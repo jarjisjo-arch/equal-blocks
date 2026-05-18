@@ -4,7 +4,6 @@
   <meta charset="utf-8" />
   <meta content="width=device-width, initial-scale=1.0" name="viewport" />
   <title>Equal Blocks</title>
-  <link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:wght,FILL@100..700,0..1&display=swap" rel="stylesheet" />
   <link href="https://fonts.googleapis.com/css2?family=Quicksand:wght@500;700&display=swap" rel="stylesheet" />
   <style>
     :root {
@@ -79,18 +78,21 @@
     }
 
     .material-symbols-outlined {
-      font-family: "Material Symbols Outlined";
-      font-weight: normal;
+      font-family: "Quicksand", system-ui, sans-serif;
+      font-weight: 700;
       font-style: normal;
       font-size: 24px;
       line-height: 1;
-      letter-spacing: normal;
+      letter-spacing: 0;
       text-transform: none;
-      display: inline-block;
+      display: inline-flex;
+      align-items: center;
+      justify-content: center;
+      width: 1em;
+      min-width: 1em;
       white-space: nowrap;
       word-wrap: normal;
       direction: ltr;
-      -webkit-font-feature-settings: "liga";
       -webkit-font-smoothing: antialiased;
     }
 
@@ -1229,6 +1231,29 @@
       "tile-green",
       "tile-yellow"
     ];
+    const iconGlyphs = {
+      grid_view: "▦",
+      settings: "⚙",
+      play_arrow: "▶",
+      refresh: "↻",
+      psychology: "?",
+      favorite: "♥",
+      pause: "Ⅱ",
+      unfold_more: "⇅",
+      close: "×",
+      volume_up: "♪",
+      vibration: "≋",
+      delete: "⌫",
+      replay: "↻",
+      home: "⌂",
+      arrow_forward: "→",
+      smart_display: "▶",
+      swap_vert: "⇅",
+      balance: "=",
+      timer: "◷",
+      keyboard_arrow_up: "↑",
+      keyboard_arrow_down: "↓"
+    };
 
     const state = {
       level: 1,
@@ -1260,6 +1285,18 @@
 
     const $ = (selector) => document.querySelector(selector);
     const $$ = (selector) => [...document.querySelectorAll(selector)];
+
+    function iconGlyph(name) {
+      return iconGlyphs[name] || name;
+    }
+
+    function normalizeIcons(root = document) {
+      root.querySelectorAll(".material-symbols-outlined").forEach((icon) => {
+        const raw = icon.dataset.iconName || icon.textContent.trim();
+        icon.dataset.iconName = raw;
+        icon.textContent = iconGlyph(raw);
+      });
+    }
 
     const els = {
       menuScreen: $("#menu-screen"),
@@ -1717,7 +1754,8 @@
         const heart = document.createElement("span");
         heart.className = "material-symbols-outlined" + (i >= state.lives ? " empty" : "");
         heart.style.fontVariationSettings = i < state.lives ? "'FILL' 1" : "'FILL' 0";
-        heart.textContent = "favorite";
+        heart.dataset.iconName = "favorite";
+        heart.textContent = iconGlyph("favorite");
         els.hearts.appendChild(heart);
       }
     }
@@ -1765,10 +1803,12 @@
       if (zone === "tray") {
         const up = document.createElement("span");
         up.className = "material-symbols-outlined arrow up";
-        up.textContent = "keyboard_arrow_up";
+        up.dataset.iconName = "keyboard_arrow_up";
+        up.textContent = iconGlyph("keyboard_arrow_up");
         const down = document.createElement("span");
         down.className = "material-symbols-outlined arrow down";
-        down.textContent = "keyboard_arrow_down";
+        down.dataset.iconName = "keyboard_arrow_down";
+        down.textContent = iconGlyph("keyboard_arrow_down");
         div.appendChild(up);
       }
 
@@ -1780,7 +1820,8 @@
       if (zone === "tray") {
         const down = document.createElement("span");
         down.className = "material-symbols-outlined arrow down";
-        down.textContent = "keyboard_arrow_down";
+        down.dataset.iconName = "keyboard_arrow_down";
+        down.textContent = iconGlyph("keyboard_arrow_down");
         div.appendChild(down);
       }
 
@@ -2166,6 +2207,7 @@
       });
     }
 
+    normalizeIcons();
     loadSave();
     wireEvents();
     renderMenu();

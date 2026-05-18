@@ -1,0 +1,2175 @@
+<!DOCTYPE html>
+<html class="dark" lang="en">
+<head>
+  <meta charset="utf-8" />
+  <meta content="width=device-width, initial-scale=1.0" name="viewport" />
+  <title>Equal Blocks</title>
+  <link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:wght,FILL@100..700,0..1&display=swap" rel="stylesheet" />
+  <link href="https://fonts.googleapis.com/css2?family=Quicksand:wght@500;700&display=swap" rel="stylesheet" />
+  <style>
+    :root {
+      --tertiary-fixed: #ffdcbd;
+      --inverse-primary: #006591;
+      --tertiary: #ffb86e;
+      --on-secondary-fixed-variant: #92002a;
+      --on-tertiary-fixed: #2c1600;
+      --tertiary-fixed-dim: #ffb86e;
+      --on-tertiary: #492900;
+      --on-error-container: #ffdad6;
+      --on-error: #690005;
+      --on-secondary: #67001b;
+      --error-container: #93000a;
+      --secondary-container: #b50036;
+      --surface-container-highest: #30353a;
+      --on-primary-container: #003751;
+      --surface: #0f1418;
+      --surface-container: #1b2024;
+      --surface-tint: #89ceff;
+      --primary-container: #0ea5e9;
+      --surface-variant: #30353a;
+      --tertiary-container: #de8712;
+      --outline: #88929b;
+      --on-primary: #00344d;
+      --outline-variant: #3e4850;
+      --surface-container-high: #252b2f;
+      --surface-dim: #0f1418;
+      --inverse-surface: #dee3e9;
+      --surface-bright: #353a3e;
+      --on-tertiary-container: #4d2b00;
+      --on-surface: #dee3e9;
+      --secondary: #ffb2b7;
+      --inverse-on-surface: #2c3135;
+      --surface-container-lowest: #0a0f13;
+      --primary-fixed: #c9e6ff;
+      --on-primary-fixed: #001e2f;
+      --on-primary-fixed-variant: #004c6e;
+      --on-background: #dee3e9;
+      --surface-container-low: #171c20;
+      --primary: #89ceff;
+      --on-surface-variant: #bec8d2;
+      --secondary-fixed: #ffdadb;
+      --error: #ffb4ab;
+      --primary-fixed-dim: #89ceff;
+      --on-secondary-container: #ffc2c4;
+      --background: #0f1418;
+      --tile-gap: 8px;
+      --container-margin: 24px;
+      --stack-sm: 4px;
+      --grid-padding: 16px;
+      --stack-md: 12px;
+    }
+
+    * {
+      box-sizing: border-box;
+      -webkit-tap-highlight-color: transparent;
+      user-select: none;
+    }
+
+    body {
+      min-height: max(884px, 100dvh);
+      margin: 0;
+      background: var(--background);
+      color: var(--on-background);
+      font-family: "Quicksand", system-ui, sans-serif;
+      overflow-x: hidden;
+    }
+
+    button, input {
+      font: inherit;
+    }
+
+    .material-symbols-outlined {
+      font-family: "Material Symbols Outlined";
+      font-weight: normal;
+      font-style: normal;
+      font-size: 24px;
+      line-height: 1;
+      letter-spacing: normal;
+      text-transform: none;
+      display: inline-block;
+      white-space: nowrap;
+      word-wrap: normal;
+      direction: ltr;
+      -webkit-font-feature-settings: "liga";
+      -webkit-font-smoothing: antialiased;
+    }
+
+    .app {
+      min-height: 100dvh;
+      display: flex;
+      flex-direction: column;
+      background:
+        radial-gradient(circle at 50% -20%, rgba(137, 206, 255, 0.14), transparent 34%),
+        var(--background);
+    }
+
+    .screen {
+      display: none;
+      min-height: 100dvh;
+      flex: 1;
+      flex-direction: column;
+      width: 100%;
+    }
+
+    .screen.is-active {
+      display: flex;
+    }
+
+    .top-app-bar {
+      background: rgba(15, 20, 24, 0.8);
+      backdrop-filter: blur(12px);
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      padding: 0 var(--container-margin);
+      height: 80px;
+      width: 100%;
+      border-bottom: 1px solid rgba(62, 72, 80, 0.1);
+      box-shadow: 0 1px 8px rgba(0, 0, 0, 0.12);
+      position: sticky;
+      top: 0;
+      z-index: 10;
+    }
+
+    .brand {
+      display: flex;
+      align-items: center;
+      gap: var(--stack-md);
+      min-width: 0;
+    }
+
+    .brand .material-symbols-outlined,
+    .brand-title {
+      color: var(--primary-fixed-dim);
+    }
+
+    .brand-title {
+      margin: 0;
+      font-size: 24px;
+      line-height: 32px;
+      font-weight: 700;
+      letter-spacing: 0;
+      white-space: nowrap;
+    }
+
+    .level-pill {
+      display: flex;
+      align-items: center;
+      gap: 10px;
+      color: var(--on-surface-variant);
+      font-size: 14px;
+      line-height: 20px;
+      font-weight: 700;
+      letter-spacing: 0.05em;
+      text-transform: none;
+    }
+
+    .life-bank {
+      display: inline-flex;
+      align-items: center;
+      gap: 4px;
+      color: var(--secondary);
+      background: rgba(255, 178, 183, 0.08);
+      border: 1px solid rgba(255, 178, 183, 0.16);
+      border-radius: 999px;
+      padding: 4px 8px;
+      font-size: 14px;
+      line-height: 20px;
+      font-weight: 700;
+      letter-spacing: 0;
+    }
+
+    .life-bank .material-symbols-outlined {
+      font-size: 18px;
+      font-variation-settings: "FILL" 1;
+    }
+
+    .life-bank.is-empty {
+      color: var(--on-surface-variant);
+      background: rgba(190, 200, 210, 0.06);
+      border-color: rgba(190, 200, 210, 0.12);
+    }
+
+    .icon-button {
+      border: 0;
+      width: 40px;
+      height: 40px;
+      border-radius: 12px;
+      display: inline-flex;
+      align-items: center;
+      justify-content: center;
+      background: transparent;
+      color: var(--on-surface-variant);
+      cursor: pointer;
+      transition: background 160ms ease, transform 160ms ease, color 160ms ease;
+    }
+
+    .icon-button:hover {
+      background: rgba(137, 206, 255, 0.08);
+      color: var(--primary);
+    }
+
+    .icon-button:active {
+      transform: translateY(1px);
+    }
+
+    .game-main {
+      flex: 1;
+      display: flex;
+      flex-direction: column;
+      padding: var(--stack-md) var(--container-margin);
+      gap: var(--stack-md);
+      width: 100%;
+      max-width: 448px;
+      margin: 0 auto;
+    }
+
+    .inner-glow {
+      box-shadow: inset 0 2px 4px rgba(255, 255, 255, 0.2);
+    }
+
+    .tactile-shadow {
+      box-shadow: 0 4px 0 rgba(0, 0, 0, 0.3), 0 8px 16px rgba(0, 0, 0, 0.2);
+    }
+
+    .tile-shadow {
+      box-shadow: 0 4px 0 rgba(0, 0, 0, 0.4), 0 8px 12px rgba(0, 0, 0, 0.3), inset 0 2px 4px rgba(255, 255, 255, 0.2);
+    }
+
+    .recessed-tray {
+      box-shadow: inset 0 4px 8px rgba(0, 0, 0, 0.5), inset 0 -2px 4px rgba(255, 255, 255, 0.05);
+    }
+
+    .status-bar {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      background: var(--surface-container-high);
+      border-radius: 12px;
+      padding: var(--grid-padding);
+      border: 1px solid rgba(62, 72, 80, 0.2);
+      box-shadow: 0 1px 2px rgba(0, 0, 0, 0.18);
+    }
+
+    .hearts {
+      display: flex;
+      gap: var(--stack-sm);
+      color: var(--secondary);
+    }
+
+    .hearts .empty {
+      color: rgba(190, 200, 210, 0.38);
+      font-variation-settings: "FILL" 0;
+    }
+
+    .timer {
+      font-size: 32px;
+      line-height: 1;
+      color: var(--on-surface);
+      font-family: ui-monospace, SFMono-Regular, Menlo, Consolas, "Liberation Mono", monospace;
+      font-weight: 700;
+      letter-spacing: 0.12em;
+    }
+
+    .timer.is-low {
+      color: var(--error);
+      animation: timer-pulse 700ms ease-in-out infinite alternate;
+    }
+
+    .game-board {
+      flex: 1;
+      min-height: 400px;
+      background: var(--surface-container);
+      border-radius: 24px;
+      padding: var(--grid-padding);
+      border: 1px solid rgba(62, 72, 80, 0.3);
+      display: flex;
+      flex-direction: column;
+      gap: var(--stack-md);
+      position: relative;
+    }
+
+    .zone {
+      flex: 1;
+      min-height: 150px;
+      background: var(--surface-container-low);
+      border-radius: 12px;
+      border: 1px solid rgba(62, 72, 80, 0.1);
+      padding: var(--grid-padding);
+      position: relative;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      justify-content: center;
+      transition: border-color 180ms ease, box-shadow 180ms ease, transform 180ms ease;
+    }
+
+    .zone.lower-zone {
+      border-style: dashed;
+    }
+
+    .zone.is-targeted {
+      border-color: rgba(137, 206, 255, 0.55);
+      box-shadow: inset 0 0 0 1px rgba(137, 206, 255, 0.25);
+    }
+
+    .zone.success {
+      border-color: rgba(92, 214, 142, 0.75);
+      box-shadow: 0 0 0 2px rgba(92, 214, 142, 0.2), inset 0 0 24px rgba(92, 214, 142, 0.08);
+    }
+
+    .zone.warning {
+      border-color: rgba(255, 180, 171, 0.7);
+      box-shadow: inset 0 0 24px rgba(255, 180, 171, 0.08);
+    }
+
+    .tile-grid {
+      display: flex;
+      flex-wrap: wrap;
+      justify-content: center;
+      gap: var(--tile-gap);
+      width: 100%;
+      max-width: 280px;
+      min-height: 82px;
+      align-content: center;
+    }
+
+    .divider {
+      display: flex;
+      align-items: center;
+      width: 100%;
+      padding: 0 var(--grid-padding);
+      opacity: 0.5;
+      color: var(--outline-variant);
+    }
+
+    .divider-line {
+      height: 1px;
+      flex: 1;
+      background: var(--outline-variant);
+    }
+
+    .divider .material-symbols-outlined {
+      margin: 0 var(--stack-sm);
+    }
+
+    .block-tray {
+      border-radius: 12px;
+      padding: var(--grid-padding);
+      margin-top: 2px;
+    }
+
+    .tray-row {
+      display: flex;
+      justify-content: center;
+      gap: var(--tray-gap, var(--tile-gap));
+      overflow-x: hidden;
+      padding-bottom: var(--stack-sm);
+      scrollbar-width: none;
+      flex-wrap: nowrap;
+    }
+
+    .tray-row::-webkit-scrollbar {
+      display: none;
+    }
+
+    .tile {
+      border: 1px solid rgba(255, 255, 255, 0.12);
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      cursor: grab;
+      position: relative;
+      touch-action: none;
+      transition: transform 150ms ease, filter 150ms ease, opacity 150ms ease;
+      flex-shrink: 0;
+      color: var(--tile-text);
+      background: var(--tile-bg);
+    }
+
+    .tile:active {
+      cursor: grabbing;
+      transform: scale(0.98);
+    }
+
+    .tile:hover {
+      transform: translateY(-3px);
+      filter: brightness(1.06);
+    }
+
+    .tile.is-dragging {
+      opacity: 0.72;
+      transform: scale(1.04);
+      z-index: 4;
+    }
+
+    .board-tile {
+      width: 80px;
+      height: 80px;
+      border-radius: 12px;
+    }
+
+    .tray-tile {
+      width: var(--tray-tile-size, 64px);
+      height: var(--tray-tile-size, 64px);
+      border-radius: clamp(6px, calc(var(--tray-tile-size, 64px) * 0.13), 8px);
+      flex-direction: column;
+    }
+
+    .tile-number {
+      display: block;
+      font-weight: 700;
+      line-height: 1;
+      letter-spacing: 0;
+      filter: drop-shadow(0 1px 1px rgba(255, 255, 255, 0.15));
+    }
+
+    .board-tile .tile-number {
+      font-size: 44px;
+    }
+
+    .tray-tile .tile-number {
+      font-size: clamp(12px, calc(var(--tray-tile-size, 64px) * 0.38), 24px);
+      margin-top: 2px;
+    }
+
+    .tile.long .tile-number {
+      font-size: 28px;
+    }
+
+    .tray-tile.long .tile-number {
+      font-size: clamp(9px, calc(var(--tray-tile-size, 64px) * 0.29), 18px);
+    }
+
+    .tile.xlong .tile-number {
+      font-size: 22px;
+    }
+
+    .tray-tile.xlong .tile-number {
+      font-size: clamp(8px, calc(var(--tray-tile-size, 64px) * 0.23), 15px);
+    }
+
+    .tile .arrow {
+      position: absolute;
+      font-size: clamp(8px, calc(var(--tray-tile-size, 64px) * 0.19), 12px);
+      color: color-mix(in srgb, var(--tile-text) 55%, transparent);
+      transition: color 150ms ease;
+    }
+
+    .tile:hover .arrow {
+      color: var(--tile-text);
+    }
+
+    .tile .arrow.up {
+      top: 3px;
+    }
+
+    .tile .arrow.down {
+      bottom: 3px;
+    }
+
+    .tile-blue {
+      --tile-bg: var(--primary-container);
+      --tile-text: var(--on-primary-container);
+    }
+
+    .tile-sky {
+      --tile-bg: var(--primary);
+      --tile-text: var(--on-primary);
+    }
+
+    .tile-pink {
+      --tile-bg: var(--secondary-container);
+      --tile-text: var(--on-secondary-container);
+    }
+
+    .tile-orange {
+      --tile-bg: var(--tertiary-container);
+      --tile-text: var(--on-tertiary-container);
+    }
+
+    .tile-peach {
+      --tile-bg: var(--tertiary);
+      --tile-text: var(--on-tertiary);
+    }
+
+    .tile-purple {
+      --tile-bg: #c735e7;
+      --tile-text: #fff3ff;
+    }
+
+    .tile-green {
+      --tile-bg: #98d85f;
+      --tile-text: #24350e;
+    }
+
+    .tile-yellow {
+      --tile-bg: #ffdc2f;
+      --tile-text: #2d2a00;
+    }
+
+    .ad-shell {
+      width: 100%;
+      background: var(--surface-container-lowest);
+      border-top: 1px solid rgba(62, 72, 80, 0.2);
+      padding: var(--stack-md);
+      display: flex;
+      justify-content: center;
+      margin-top: auto;
+    }
+
+    .ad-box {
+      width: 320px;
+      height: 50px;
+      background: var(--surface);
+      border: 1px dashed var(--outline-variant);
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      border-radius: 4px;
+      color: var(--outline);
+      font-size: 14px;
+      line-height: 20px;
+      letter-spacing: 0.05em;
+      font-weight: 700;
+    }
+
+    .menu-main {
+      flex: 1;
+      width: 100%;
+      max-width: 448px;
+      margin: 0 auto;
+      padding: 28px var(--container-margin) var(--stack-md);
+      display: flex;
+      flex-direction: column;
+      gap: var(--stack-md);
+      justify-content: center;
+    }
+
+    .menu-mark {
+      min-height: 234px;
+      background: var(--surface-container);
+      border: 1px solid rgba(62, 72, 80, 0.3);
+      border-radius: 24px;
+      padding: 24px;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      justify-content: center;
+      gap: 18px;
+      box-shadow: inset 0 4px 8px rgba(0, 0, 0, 0.35), inset 0 -2px 4px rgba(255, 255, 255, 0.04);
+    }
+
+    .logo-grid {
+      display: grid;
+      grid-template-columns: repeat(2, 76px);
+      gap: 10px;
+    }
+
+    .logo-tile {
+      width: 76px;
+      height: 76px;
+      border-radius: 14px;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      font-size: 34px;
+      line-height: 1;
+      font-weight: 700;
+      border: 1px solid rgba(255, 255, 255, 0.12);
+    }
+
+    .menu-title {
+      margin: 0;
+      color: var(--primary-fixed-dim);
+      font-size: 32px;
+      line-height: 40px;
+      font-weight: 700;
+    }
+
+    .menu-subtitle {
+      margin: 0;
+      color: var(--on-surface-variant);
+      font-size: 16px;
+      line-height: 22px;
+      text-align: center;
+    }
+
+    .menu-actions {
+      display: grid;
+      gap: 10px;
+    }
+
+    .action-button {
+      min-height: 56px;
+      border: 0;
+      border-radius: 14px;
+      color: var(--on-primary);
+      background: var(--primary);
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      gap: 10px;
+      font-size: 18px;
+      line-height: 24px;
+      font-weight: 700;
+      cursor: pointer;
+      box-shadow: 0 4px 0 rgba(0, 0, 0, 0.35), 0 8px 16px rgba(0, 0, 0, 0.2), inset 0 2px 4px rgba(255, 255, 255, 0.22);
+      transition: transform 150ms ease, filter 150ms ease;
+    }
+
+    .action-button:hover {
+      filter: brightness(1.05);
+      transform: translateY(-1px);
+    }
+
+    .action-button:active {
+      transform: translateY(2px);
+      box-shadow: 0 2px 0 rgba(0, 0, 0, 0.35), 0 6px 12px rgba(0, 0, 0, 0.2), inset 0 2px 4px rgba(255, 255, 255, 0.18);
+    }
+
+    .action-button.secondary {
+      background: var(--surface-container-high);
+      color: var(--on-surface);
+      border: 1px solid rgba(62, 72, 80, 0.28);
+    }
+
+    .action-button.danger {
+      background: var(--error-container);
+      color: var(--on-error-container);
+    }
+
+    .mini-stats {
+      display: grid;
+      grid-template-columns: repeat(2, 1fr);
+      gap: 10px;
+    }
+
+    .stat {
+      background: var(--surface-container-high);
+      border: 1px solid rgba(62, 72, 80, 0.2);
+      border-radius: 12px;
+      padding: 14px;
+      display: flex;
+      flex-direction: column;
+      gap: 4px;
+    }
+
+    .stat-label {
+      color: var(--on-surface-variant);
+      font-size: 12px;
+      line-height: 16px;
+      font-weight: 700;
+      letter-spacing: 0.05em;
+    }
+
+    .stat-value {
+      color: var(--on-surface);
+      font-size: 24px;
+      line-height: 30px;
+      font-weight: 700;
+    }
+
+    .modal {
+      position: fixed;
+      inset: 0;
+      z-index: 30;
+      display: none;
+      align-items: center;
+      justify-content: center;
+      padding: 24px;
+      background: rgba(10, 15, 19, 0.72);
+      backdrop-filter: blur(10px);
+    }
+
+    .modal.is-active {
+      display: flex;
+    }
+
+    .modal-panel {
+      width: 100%;
+      max-width: 400px;
+      background: var(--surface-container);
+      border: 1px solid rgba(62, 72, 80, 0.38);
+      border-radius: 24px;
+      padding: 18px;
+      box-shadow: 0 20px 40px rgba(0, 0, 0, 0.36), inset 0 2px 4px rgba(255, 255, 255, 0.04);
+    }
+
+    .modal-head {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      gap: 12px;
+      margin-bottom: 12px;
+    }
+
+    .modal-title {
+      margin: 0;
+      color: var(--primary-fixed-dim);
+      font-size: 24px;
+      line-height: 32px;
+      font-weight: 700;
+    }
+
+    .modal-body {
+      display: grid;
+      gap: 10px;
+    }
+
+    .setting-row {
+      background: var(--surface-container-low);
+      border: 1px solid rgba(62, 72, 80, 0.22);
+      border-radius: 12px;
+      padding: 14px;
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      gap: 12px;
+    }
+
+    .setting-label {
+      display: flex;
+      align-items: center;
+      gap: 10px;
+      color: var(--on-surface);
+      font-weight: 700;
+    }
+
+    .recovery-panel {
+      display: none;
+      gap: 10px;
+    }
+
+    .recovery-panel.is-active {
+      display: grid;
+    }
+
+    .cooldown-text {
+      color: var(--on-surface-variant);
+      font-size: 16px;
+      line-height: 22px;
+      font-weight: 700;
+      text-align: center;
+    }
+
+    .fullscreen-ad {
+      position: fixed;
+      inset: 0;
+      z-index: 60;
+      display: none;
+      place-items: center;
+      padding: 24px;
+      background:
+        radial-gradient(circle at 50% 20%, rgba(137, 206, 255, 0.18), transparent 36%),
+        var(--surface-container-lowest);
+    }
+
+    .fullscreen-ad.is-active {
+      display: grid;
+    }
+
+    .ad-card {
+      width: min(360px, 100%);
+      min-height: 460px;
+      border-radius: 24px;
+      border: 1px solid rgba(62, 72, 80, 0.42);
+      background: var(--surface-container);
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      justify-content: center;
+      gap: 18px;
+      padding: 24px;
+      text-align: center;
+    }
+
+    .ad-count {
+      width: 88px;
+      height: 88px;
+      border-radius: 50%;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      background: var(--primary);
+      color: var(--on-primary);
+      font-size: 36px;
+      line-height: 42px;
+      font-weight: 700;
+    }
+
+    .toggle {
+      position: relative;
+      width: 52px;
+      height: 30px;
+      border: 0;
+      border-radius: 999px;
+      background: var(--surface-container-highest);
+      cursor: pointer;
+      transition: background 150ms ease;
+    }
+
+    .toggle::after {
+      content: "";
+      position: absolute;
+      top: 4px;
+      left: 4px;
+      width: 22px;
+      height: 22px;
+      border-radius: 50%;
+      background: var(--on-surface-variant);
+      transition: transform 150ms ease, background 150ms ease;
+    }
+
+    .toggle[aria-pressed="true"] {
+      background: var(--primary-container);
+    }
+
+    .toggle[aria-pressed="true"]::after {
+      transform: translateX(22px);
+      background: var(--primary-fixed);
+    }
+
+    .toast {
+      position: fixed;
+      left: 50%;
+      bottom: 84px;
+      transform: translateX(-50%) translateY(18px);
+      opacity: 0;
+      pointer-events: none;
+      z-index: 40;
+      background: var(--surface-container-highest);
+      color: var(--on-surface);
+      border: 1px solid rgba(62, 72, 80, 0.35);
+      border-radius: 999px;
+      padding: 10px 16px;
+      font-weight: 700;
+      box-shadow: 0 10px 28px rgba(0, 0, 0, 0.28);
+      transition: opacity 180ms ease, transform 180ms ease;
+    }
+
+    .toast.is-active {
+      opacity: 1;
+      transform: translateX(-50%) translateY(0);
+    }
+
+    .board-flash {
+      animation: board-shake 360ms ease;
+    }
+
+    .solved-pop {
+      animation: solved-pop 520ms ease;
+    }
+
+    .confetti-layer {
+      position: fixed;
+      inset: 0;
+      pointer-events: none;
+      overflow: hidden;
+      z-index: 35;
+    }
+
+    .confetti {
+      position: absolute;
+      width: 8px;
+      height: 14px;
+      border-radius: 3px;
+      animation: confetti-fall 900ms ease forwards;
+    }
+
+    @keyframes timer-pulse {
+      from { opacity: 0.75; }
+      to { opacity: 1; }
+    }
+
+    @keyframes board-shake {
+      0%, 100% { transform: translateX(0); }
+      25% { transform: translateX(-6px); }
+      50% { transform: translateX(6px); }
+      75% { transform: translateX(-3px); }
+    }
+
+    @keyframes solved-pop {
+      0% { transform: scale(1); }
+      50% { transform: scale(1.025); }
+      100% { transform: scale(1); }
+    }
+
+    @keyframes confetti-fall {
+      0% {
+        opacity: 1;
+        transform: translate3d(0, -20px, 0) rotate(0deg);
+      }
+      100% {
+        opacity: 0;
+        transform: translate3d(var(--dx), 110vh, 0) rotate(540deg);
+      }
+    }
+
+    @media (max-width: 380px) {
+      :root {
+        --container-margin: 14px;
+        --grid-padding: 12px;
+      }
+
+      .brand-title {
+        font-size: 20px;
+      }
+
+      .timer {
+        font-size: 27px;
+      }
+
+      .board-tile {
+        width: 70px;
+        height: 70px;
+      }
+
+      .board-tile .tile-number {
+        font-size: 36px;
+      }
+
+      .tray-tile {
+        width: var(--tray-tile-size, 58px);
+        height: var(--tray-tile-size, 58px);
+      }
+    }
+  </style>
+</head>
+<body>
+  <div class="app">
+    <section class="screen is-active" id="menu-screen">
+      <header class="top-app-bar">
+        <div class="brand">
+          <span class="material-symbols-outlined" aria-hidden="true">grid_view</span>
+          <h1 class="brand-title">Equal Blocks</h1>
+        </div>
+        <button class="icon-button" id="menu-settings-button" aria-label="Settings">
+          <span class="material-symbols-outlined" aria-hidden="true">settings</span>
+        </button>
+      </header>
+
+      <main class="menu-main">
+        <div class="menu-mark">
+          <div class="logo-grid" aria-hidden="true">
+            <div class="logo-tile tile-blue tile-shadow" style="color: var(--on-primary-container); background: var(--primary-container);">70</div>
+            <div class="logo-tile tile-pink tile-shadow" style="color: var(--on-secondary-container); background: var(--secondary-container);">30</div>
+            <div class="logo-tile tile-orange tile-shadow" style="color: var(--on-tertiary-container); background: var(--tertiary-container);">40</div>
+            <div class="logo-tile tile-sky tile-shadow" style="color: var(--on-primary); background: var(--primary);">60</div>
+          </div>
+          <h2 class="menu-title">Equal Blocks</h2>
+          <p class="menu-subtitle">Make both sides equal.</p>
+        </div>
+
+        <div class="mini-stats">
+          <div class="stat">
+            <span class="stat-label">CURRENT</span>
+            <span class="stat-value" id="menu-current-level">Lv. 1</span>
+          </div>
+          <div class="stat">
+            <span class="stat-label">BEST</span>
+            <span class="stat-value" id="menu-best-level">Lv. 1</span>
+          </div>
+          <div class="stat">
+            <span class="stat-label">LIVES</span>
+            <span class="stat-value" id="menu-bank-lives">5/5</span>
+          </div>
+          <div class="stat">
+            <span class="stat-label">REFILL</span>
+            <span class="stat-value" id="menu-refill-time">Ready</span>
+          </div>
+        </div>
+
+        <div class="menu-actions">
+          <button class="action-button" id="play-button">
+            <span class="material-symbols-outlined" aria-hidden="true">play_arrow</span>
+            Play
+          </button>
+          <button class="action-button secondary" id="new-game-button">
+            <span class="material-symbols-outlined" aria-hidden="true">refresh</span>
+            New Game
+          </button>
+          <button class="action-button secondary" id="how-button">
+            <span class="material-symbols-outlined" aria-hidden="true">psychology</span>
+            Rules
+          </button>
+        </div>
+      </main>
+
+      <div class="ad-shell">
+        <div class="ad-box">Ad</div>
+      </div>
+    </section>
+
+    <section class="screen" id="game-screen">
+      <header class="top-app-bar">
+        <div class="brand">
+          <span class="material-symbols-outlined" aria-hidden="true">grid_view</span>
+          <h1 class="brand-title">Equal Blocks</h1>
+        </div>
+        <div class="level-pill">
+          <span id="level-label">Lv. 1</span>
+          <span class="life-bank" id="bank-lives-pill" aria-label="Game lives">
+            <span class="material-symbols-outlined" aria-hidden="true">favorite</span>
+            <span id="bank-lives-label">5</span>
+          </span>
+          <button class="icon-button" id="pause-button" aria-label="Pause">
+            <span class="material-symbols-outlined" aria-hidden="true">pause</span>
+          </button>
+        </div>
+      </header>
+
+      <main class="game-main">
+        <div class="status-bar inner-glow">
+          <div class="hearts" id="hearts" aria-label="Lives"></div>
+          <div class="timer" id="timer">00:45</div>
+        </div>
+
+        <div class="game-board recessed-tray" id="game-board">
+          <div class="zone upper-zone" id="upper-zone" data-zone="upper">
+            <div class="tile-grid" id="upper-grid"></div>
+          </div>
+
+          <div class="divider">
+            <div class="divider-line"></div>
+            <span class="material-symbols-outlined" aria-hidden="true">unfold_more</span>
+            <div class="divider-line"></div>
+          </div>
+
+          <div class="zone lower-zone" id="lower-zone" data-zone="lower">
+            <div class="tile-grid" id="lower-grid"></div>
+          </div>
+        </div>
+
+        <div class="block-tray">
+          <div class="tray-row" id="tray-row"></div>
+        </div>
+      </main>
+
+      <div class="ad-shell">
+        <div class="ad-box">Ad</div>
+      </div>
+    </section>
+  </div>
+
+  <div class="modal" id="settings-modal" role="dialog" aria-modal="true" aria-labelledby="settings-title">
+    <div class="modal-panel recessed-tray">
+      <div class="modal-head">
+        <h2 class="modal-title" id="settings-title">Settings</h2>
+        <button class="icon-button" data-close-modal="settings-modal" aria-label="Close settings">
+          <span class="material-symbols-outlined" aria-hidden="true">close</span>
+        </button>
+      </div>
+      <div class="modal-body">
+        <div class="setting-row">
+          <span class="setting-label">
+            <span class="material-symbols-outlined" aria-hidden="true">volume_up</span>
+            Sound
+          </span>
+          <button class="toggle" id="sound-toggle" type="button" aria-label="Toggle sound" aria-pressed="true"></button>
+        </div>
+        <div class="setting-row">
+          <span class="setting-label">
+            <span class="material-symbols-outlined" aria-hidden="true">vibration</span>
+            Vibration
+          </span>
+          <button class="toggle" id="vibration-toggle" type="button" aria-label="Toggle vibration" aria-pressed="true"></button>
+        </div>
+        <button class="action-button danger" id="reset-progress-button">
+          <span class="material-symbols-outlined" aria-hidden="true">delete</span>
+          Reset Progress
+        </button>
+      </div>
+    </div>
+  </div>
+
+  <div class="modal" id="pause-modal" role="dialog" aria-modal="true" aria-labelledby="pause-title">
+    <div class="modal-panel recessed-tray">
+      <div class="modal-head">
+        <h2 class="modal-title" id="pause-title">Paused</h2>
+        <button class="icon-button" data-close-modal="pause-modal" aria-label="Resume">
+          <span class="material-symbols-outlined" aria-hidden="true">close</span>
+        </button>
+      </div>
+      <div class="modal-body">
+        <button class="action-button" id="resume-button">
+          <span class="material-symbols-outlined" aria-hidden="true">play_arrow</span>
+          Resume
+        </button>
+        <button class="action-button secondary" id="restart-button">
+          <span class="material-symbols-outlined" aria-hidden="true">replay</span>
+          Restart Level
+        </button>
+        <button class="action-button secondary" id="pause-settings-button">
+          <span class="material-symbols-outlined" aria-hidden="true">settings</span>
+          Settings
+        </button>
+        <button class="action-button secondary" id="quit-button">
+          <span class="material-symbols-outlined" aria-hidden="true">home</span>
+          Main Menu
+        </button>
+      </div>
+    </div>
+  </div>
+
+  <div class="modal" id="result-modal" role="dialog" aria-modal="true" aria-labelledby="result-title">
+    <div class="modal-panel recessed-tray">
+      <div class="modal-head">
+        <h2 class="modal-title" id="result-title">Balanced</h2>
+      </div>
+      <div class="modal-body">
+        <div class="mini-stats">
+          <div class="stat">
+            <span class="stat-label">NEXT</span>
+            <span class="stat-value" id="next-level-stat">Lv. 2</span>
+          </div>
+          <div class="stat">
+            <span class="stat-label">BONUS</span>
+            <span class="stat-value">+15s</span>
+          </div>
+        </div>
+        <button class="action-button" id="next-level-button">
+          <span class="material-symbols-outlined" aria-hidden="true">arrow_forward</span>
+          Next Level
+        </button>
+      </div>
+    </div>
+  </div>
+
+  <div class="modal" id="gameover-modal" role="dialog" aria-modal="true" aria-labelledby="gameover-title">
+    <div class="modal-panel recessed-tray">
+      <div class="modal-head">
+        <h2 class="modal-title" id="gameover-title">Try Again</h2>
+      </div>
+      <div class="modal-body">
+        <div class="mini-stats">
+          <div class="stat">
+            <span class="stat-label">GAME LIVES</span>
+            <span class="stat-value" id="gameover-bank-lives">5/5</span>
+          </div>
+          <div class="stat">
+            <span class="stat-label">REFILL</span>
+            <span class="stat-value" id="gameover-refill-time">Ready</span>
+          </div>
+        </div>
+        <button class="action-button" id="try-again-button">
+          <span class="material-symbols-outlined" aria-hidden="true">replay</span>
+          Try Again
+        </button>
+        <div class="recovery-panel" id="recovery-panel">
+          <div class="cooldown-text" id="recovery-message">Lives are refilling</div>
+          <button class="action-button" id="watch-ad-button">
+            <span class="material-symbols-outlined" aria-hidden="true">smart_display</span>
+            Watch Ad
+          </button>
+        </div>
+        <button class="action-button secondary" id="gameover-menu-button">
+          <span class="material-symbols-outlined" aria-hidden="true">home</span>
+          Main Menu
+        </button>
+      </div>
+    </div>
+  </div>
+
+  <div class="modal" id="rules-modal" role="dialog" aria-modal="true" aria-labelledby="rules-title">
+    <div class="modal-panel recessed-tray">
+      <div class="modal-head">
+        <h2 class="modal-title" id="rules-title">Rules</h2>
+        <button class="icon-button" data-close-modal="rules-modal" aria-label="Close rules">
+          <span class="material-symbols-outlined" aria-hidden="true">close</span>
+        </button>
+      </div>
+      <div class="modal-body">
+        <div class="setting-row">
+          <span class="setting-label">
+            <span class="material-symbols-outlined" aria-hidden="true">swap_vert</span>
+            Swipe a tile up or down
+          </span>
+        </div>
+        <div class="setting-row">
+          <span class="setting-label">
+            <span class="material-symbols-outlined" aria-hidden="true">balance</span>
+            Hidden totals must match
+          </span>
+        </div>
+        <div class="setting-row">
+          <span class="setting-label">
+            <span class="material-symbols-outlined" aria-hidden="true">timer</span>
+            Beat the timer
+          </span>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <div class="toast" id="toast" role="status" aria-live="polite"></div>
+  <div class="confetti-layer" id="confetti-layer"></div>
+  <div class="fullscreen-ad" id="fullscreen-ad" aria-live="polite">
+    <div class="ad-card recessed-tray">
+      <div class="ad-count" id="ad-count">5</div>
+      <h2 class="modal-title">Sponsored Break</h2>
+      <p class="cooldown-text">Lives refill when the ad finishes.</p>
+    </div>
+  </div>
+
+  <script>
+    const STORAGE_KEY = "equalBlocksSave";
+    const STRIKES_PER_GAME = 3;
+    const MAX_GAME_LIVES = 5;
+    const LIFE_RECHARGE_SECONDS = 60;
+    const REWARDED_AD_SECONDS = 5;
+    const blockSteps = [4, 6, 8, 10];
+    const tileStyles = [
+      "tile-blue",
+      "tile-pink",
+      "tile-orange",
+      "tile-sky",
+      "tile-peach",
+      "tile-purple",
+      "tile-green",
+      "tile-yellow"
+    ];
+
+    const state = {
+      level: 1,
+      bestLevel: 1,
+      lives: STRIKES_PER_GAME,
+      gameLives: MAX_GAME_LIVES,
+      livesReadyAt: null,
+      timeLeft: 45,
+      bonusTime: 0,
+      currentTiles: [],
+      upper: [],
+      lower: [],
+      tray: [],
+      timerId: null,
+      rechargeTimerId: null,
+      adTimerId: null,
+      adSecondsLeft: REWARDED_AD_SECONDS,
+      isPlaying: false,
+      isPaused: false,
+      solved: false,
+      activeScreen: "menu",
+      settings: {
+        sound: true,
+        vibration: true
+      },
+      drag: null,
+      lastAttemptSignature: ""
+    };
+
+    const $ = (selector) => document.querySelector(selector);
+    const $$ = (selector) => [...document.querySelectorAll(selector)];
+
+    const els = {
+      menuScreen: $("#menu-screen"),
+      gameScreen: $("#game-screen"),
+      levelLabel: $("#level-label"),
+      hearts: $("#hearts"),
+      timer: $("#timer"),
+      board: $("#game-board"),
+      upperZone: $("#upper-zone"),
+      lowerZone: $("#lower-zone"),
+      upperGrid: $("#upper-grid"),
+      lowerGrid: $("#lower-grid"),
+      trayRow: $("#tray-row"),
+      menuCurrentLevel: $("#menu-current-level"),
+      menuBestLevel: $("#menu-best-level"),
+      menuBankLives: $("#menu-bank-lives"),
+      menuRefillTime: $("#menu-refill-time"),
+      settingsModal: $("#settings-modal"),
+      pauseModal: $("#pause-modal"),
+      resultModal: $("#result-modal"),
+      gameoverModal: $("#gameover-modal"),
+      rulesModal: $("#rules-modal"),
+      toast: $("#toast"),
+      confettiLayer: $("#confetti-layer"),
+      soundToggle: $("#sound-toggle"),
+      vibrationToggle: $("#vibration-toggle"),
+      resultTitle: $("#result-title"),
+      gameoverTitle: $("#gameover-title"),
+      nextLevelStat: $("#next-level-stat"),
+      bankLivesPill: $("#bank-lives-pill"),
+      bankLivesLabel: $("#bank-lives-label"),
+      gameoverBankLives: $("#gameover-bank-lives"),
+      gameoverRefillTime: $("#gameover-refill-time"),
+      recoveryPanel: $("#recovery-panel"),
+      recoveryMessage: $("#recovery-message"),
+      tryAgainButton: $("#try-again-button"),
+      watchAdButton: $("#watch-ad-button"),
+      fullscreenAd: $("#fullscreen-ad"),
+      adCount: $("#ad-count")
+    };
+
+    function loadSave() {
+      try {
+        const saved = JSON.parse(localStorage.getItem(STORAGE_KEY) || "{}");
+        state.level = Number.isFinite(saved.level) ? Math.max(1, saved.level) : 1;
+        state.bestLevel = Number.isFinite(saved.bestLevel) ? Math.max(1, saved.bestLevel) : state.level;
+        state.gameLives = Number.isFinite(saved.gameLives)
+          ? Math.max(0, Math.min(MAX_GAME_LIVES, saved.gameLives))
+          : MAX_GAME_LIVES;
+        state.livesReadyAt = Number.isFinite(saved.livesReadyAt) ? saved.livesReadyAt : null;
+        state.settings.sound = saved.settings?.sound !== false;
+        state.settings.vibration = saved.settings?.vibration !== false;
+        syncLifeRecharge();
+        if (state.gameLives <= 0) startLifeRecharge();
+      } catch {
+        state.level = 1;
+        state.bestLevel = 1;
+        state.gameLives = MAX_GAME_LIVES;
+        state.livesReadyAt = null;
+      }
+    }
+
+    function saveGame() {
+      localStorage.setItem(STORAGE_KEY, JSON.stringify({
+        level: state.level,
+        bestLevel: state.bestLevel,
+        gameLives: state.gameLives,
+        livesReadyAt: state.livesReadyAt,
+        settings: state.settings
+      }));
+    }
+
+    function showScreen(screen) {
+      state.activeScreen = screen;
+      els.menuScreen.classList.toggle("is-active", screen === "menu");
+      els.gameScreen.classList.toggle("is-active", screen === "game");
+      renderMenu();
+    }
+
+    function openModal(id) {
+      const modal = document.getElementById(id);
+      if (!modal) return;
+      modal.classList.add("is-active");
+      if (id === "pause-modal") {
+        state.isPaused = true;
+      }
+      renderToggles();
+    }
+
+    function closeModal(id) {
+      const modal = document.getElementById(id);
+      if (!modal) return;
+      modal.classList.remove("is-active");
+      if (id === "pause-modal") {
+        state.isPaused = false;
+      }
+    }
+
+    function closeAllModals() {
+      $$(".modal").forEach((modal) => modal.classList.remove("is-active"));
+      state.isPaused = false;
+    }
+
+    function renderMenu() {
+      syncLifeRecharge();
+      els.menuCurrentLevel.textContent = `Lv. ${state.level}`;
+      els.menuBestLevel.textContent = `Lv. ${state.bestLevel}`;
+      els.menuBankLives.textContent = `${state.gameLives}/${MAX_GAME_LIVES}`;
+      els.menuRefillTime.textContent = state.gameLives > 0 ? "Ready" : formatTime(getRechargeSecondsLeft());
+      renderLifeBank();
+    }
+
+    function renderToggles() {
+      els.soundToggle.setAttribute("aria-pressed", String(state.settings.sound));
+      els.vibrationToggle.setAttribute("aria-pressed", String(state.settings.vibration));
+    }
+
+    function syncLifeRecharge() {
+      if (state.gameLives <= 0 && state.livesReadyAt && Date.now() >= state.livesReadyAt) {
+        restoreGameLives(false);
+      }
+    }
+
+    function startLifeRecharge() {
+      if (state.gameLives > 0) return;
+      if (!state.livesReadyAt) {
+        state.livesReadyAt = Date.now() + LIFE_RECHARGE_SECONDS * 1000;
+        saveGame();
+      }
+      startRechargeTicker();
+    }
+
+    function startRechargeTicker() {
+      if (state.rechargeTimerId) return;
+      state.rechargeTimerId = window.setInterval(() => {
+        syncLifeRecharge();
+        renderLifeBank();
+        renderMenu();
+        renderGameOverState();
+      }, 1000);
+    }
+
+    function clearRechargeTimer() {
+      if (state.rechargeTimerId) {
+        window.clearInterval(state.rechargeTimerId);
+        state.rechargeTimerId = null;
+      }
+    }
+
+    function restoreGameLives(showMessage = true) {
+      state.gameLives = MAX_GAME_LIVES;
+      state.livesReadyAt = null;
+      clearRechargeTimer();
+      saveGame();
+      renderLifeBank();
+      renderMenu();
+      renderGameOverState();
+      if (showMessage) showToast("Lives refilled");
+    }
+
+    function getRechargeSecondsLeft() {
+      if (!state.livesReadyAt) return 0;
+      return Math.max(0, Math.ceil((state.livesReadyAt - Date.now()) / 1000));
+    }
+
+    function renderLifeBank() {
+      syncLifeRecharge();
+      const label = `${state.gameLives}`;
+      els.bankLivesLabel.textContent = label;
+      els.bankLivesPill.classList.toggle("is-empty", state.gameLives <= 0);
+    }
+
+    function renderGameOverState() {
+      if (!els.gameoverBankLives) return;
+      syncLifeRecharge();
+      const outOfLives = state.gameLives <= 0;
+      els.gameoverBankLives.textContent = `${state.gameLives}/${MAX_GAME_LIVES}`;
+      els.gameoverRefillTime.textContent = outOfLives ? formatTime(getRechargeSecondsLeft()) : "Ready";
+      els.recoveryPanel.classList.toggle("is-active", outOfLives);
+      els.tryAgainButton.style.display = outOfLives ? "none" : "flex";
+      els.recoveryMessage.textContent = outOfLives
+        ? `Lives refill in ${formatTime(getRechargeSecondsLeft())}`
+        : "";
+      if (!outOfLives && els.gameoverModal.classList.contains("is-active")) {
+        els.gameoverTitle.textContent = "Try Again";
+      }
+    }
+
+    function canStartGame() {
+      syncLifeRecharge();
+      return state.gameLives > 0;
+    }
+
+    function spendGameLife() {
+      if (state.gameLives <= 0) return;
+      state.gameLives = Math.max(0, state.gameLives - 1);
+      if (state.gameLives <= 0) {
+        startLifeRecharge();
+      }
+      saveGame();
+      renderLifeBank();
+      renderMenu();
+    }
+
+    function showOutOfLives() {
+      clearTimer();
+      state.isPlaying = false;
+      state.solved = true;
+      startLifeRecharge();
+      els.gameoverTitle.textContent = "No lives left";
+      renderGameOverState();
+      openModal("gameover-modal");
+    }
+
+    function getLevelSettings(level) {
+      const levelsPerFloor = 12;
+      const levelsPerStep = 3;
+      const floor = Math.floor((level - 1) / levelsPerFloor) + 1;
+      const levelInsideFloor = (level - 1) % levelsPerFloor;
+      const step = Math.floor(levelInsideFloor / levelsPerStep);
+      const endlessFloor = Math.max(0, floor - 5);
+      const blockCount = blockSteps[step];
+      const numberRange = floor <= 5
+        ? 18 + floor * 7 + step * 9
+        : Math.round(55 * Math.pow(1.25, endlessFloor) + step * 18);
+      const baseTime = floor <= 5
+        ? 72 - floor * 3 - step * 4
+        : 48 - endlessFloor * 2 - step * 3;
+
+      return {
+        level,
+        floor,
+        step,
+        blockCount,
+        numbersPerSide: blockCount / 2,
+        numberRange,
+        timeLimit: Math.max(12, baseTime),
+        allowNegative: floor >= 2,
+        allowPower: floor >= 3,
+        allowRoot: floor >= 4,
+        negativeChance: floor >= 2 ? Math.min(0.12 + step * 0.07 + endlessFloor * 0.025, 0.58) : 0,
+        powerChance: floor >= 3 ? Math.min(0.22 + step * 0.035 + endlessFloor * 0.018, 0.42) : 0,
+        rootChance: floor >= 4 ? Math.min(0.18 + step * 0.035 + endlessFloor * 0.018, 0.42) : 0,
+        maxPower: floor >= 3 ? (floor > 5 ? 2 + endlessFloor : 2) : 1,
+        maxRootDegree: floor >= 4 ? (floor > 5 ? 2 + endlessFloor : 2) : 1
+      };
+    }
+
+    function generateLevel(level) {
+      const settings = getLevelSettings(level);
+      const count = settings.numbersPerSide;
+      const targetMin = Math.max(12, Math.round(settings.numberRange * 0.75));
+      const targetMax = Math.max(targetMin + 8, Math.round(settings.numberRange * (1.4 + settings.step * 0.12)));
+
+      for (let attempt = 0; attempt < 400; attempt++) {
+        const target = randInt(targetMin, targetMax);
+        const upper = generateSide(count, target, settings, chooseForcedKinds(settings, "upper"));
+        const lower = generateSide(count, target, settings, chooseForcedKinds(settings, "lower"));
+
+        if (upper && lower) {
+          const tiles = shuffle([...upper, ...lower]).map((tile, index) => ({
+            ...tile,
+            id: `${level}-${index}-${Math.random().toString(36).slice(2, 8)}`,
+            color: tileStyles[index % tileStyles.length]
+          }));
+          return { settings, tiles };
+        }
+      }
+
+      return generateFallbackLevel(level, settings);
+    }
+
+    function chooseForcedKinds(settings, side) {
+      const forced = [];
+      if (settings.floor === 2 && side === "upper") forced.push("negative");
+      if (settings.floor >= 3 && side === "upper") forced.push("power");
+      if (settings.floor >= 4 && side === "lower") forced.push("root");
+      return forced;
+    }
+
+    function generateSide(count, target, settings, forcedKinds) {
+      for (let attempt = 0; attempt < 120; attempt++) {
+        const tiles = [];
+        let sum = 0;
+
+        for (let i = 0; i < count - 1; i++) {
+          const forcedKind = forcedKinds[i] || null;
+          const tile = randomTile(settings, forcedKind);
+          tiles.push(tile);
+          sum += tile.value;
+        }
+
+        const finalValue = roundValue(target - sum);
+        if (!isValidFinalValue(finalValue, settings)) continue;
+
+        tiles.push(tileFromValue(finalValue, settings));
+        return tiles;
+      }
+
+      return null;
+    }
+
+    function generateFallbackLevel(level, settings) {
+      const count = settings.numbersPerSide;
+      const target = 20 + level * 3;
+      const upper = simplePartition(count, target, settings);
+      const lower = simplePartition(count, target, settings);
+      const tiles = shuffle([...upper, ...lower]).map((tile, index) => ({
+        ...tile,
+        id: `${level}-fallback-${index}`,
+        color: tileStyles[index % tileStyles.length]
+      }));
+      return { settings, tiles };
+    }
+
+    function simplePartition(count, target, settings) {
+      const values = [];
+      let remaining = target;
+      for (let i = 0; i < count - 1; i++) {
+        const slots = count - i;
+        const value = Math.max(1, Math.floor(remaining / slots));
+        values.push(value);
+        remaining -= value;
+      }
+      values.push(remaining);
+      return values.map((value) => tileFromValue(value, settings));
+    }
+
+    function randomTile(settings, forcedKind = null) {
+      const roll = Math.random();
+      if (forcedKind === "power") return randomPowerTile(settings);
+      if (forcedKind === "root") return randomRootTile(settings);
+      if (forcedKind === "negative") return randomNegativeTile(settings);
+
+      if (settings.allowPower && roll < settings.powerChance) return randomPowerTile(settings);
+      if (settings.allowRoot && roll < settings.powerChance + settings.rootChance) return randomRootTile(settings);
+      if (settings.allowNegative && Math.random() < settings.negativeChance) return randomNegativeTile(settings);
+
+      return tileFromValue(randInt(2, Math.max(4, settings.numberRange)), settings, true);
+    }
+
+    function randomNegativeTile(settings) {
+      const max = Math.max(3, Math.round(settings.numberRange * 0.45));
+      const value = -randInt(1, max);
+      return {
+        label: String(value),
+        value,
+        kind: "negative"
+      };
+    }
+
+    function randomPowerTile(settings) {
+      const safeDegree = getSafePowerDegree(settings);
+      const degree = randInt(2, safeDegree);
+      const maxBase = Math.max(2, Math.floor(Math.pow(Math.max(4, settings.numberRange * 1.2), 1 / degree)));
+      const base = randInt(2, Math.min(9, maxBase));
+      const value = Math.pow(base, degree);
+      return {
+        label: `${base}${toSuperscript(degree)}`,
+        value,
+        kind: "power"
+      };
+    }
+
+    function randomRootTile(settings) {
+      const degree = randInt(2, Math.max(2, settings.maxRootDegree));
+      const maxResult = degree > 5 ? 4 : Math.max(3, Math.min(9, Math.floor(settings.numberRange / 5)));
+      const result = randInt(2, maxResult);
+      const radicand = Math.pow(result, degree);
+      return {
+        label: formatRoot(degree, radicand),
+        value: result,
+        kind: "root"
+      };
+    }
+
+    function getSafePowerDegree(settings) {
+      const byRange = Math.max(2, Math.floor(Math.log(Math.max(4, settings.numberRange * 1.5)) / Math.log(2)));
+      return Math.max(2, Math.min(settings.maxPower, byRange));
+    }
+
+    function tileFromValue(value, settings, forcePlain = false) {
+      const rounded = roundValue(value);
+      const rootWrapLimit = settings.floor <= 5
+        ? 12
+        : Math.max(12, Math.round(settings.numberRange / 6));
+      if (!forcePlain && rounded > 1 && rounded <= rootWrapLimit && settings.allowRoot && Math.random() < settings.rootChance * 0.45) {
+        const degree = randInt(2, Math.max(2, Math.min(settings.maxRootDegree, 5)));
+        const radicand = Math.pow(rounded, degree);
+        if (Number.isFinite(radicand) && String(radicand).length <= 6) {
+          return {
+            label: formatRoot(degree, radicand),
+            value: rounded,
+            kind: "root"
+          };
+        }
+      }
+
+      return {
+        label: String(rounded),
+        value: rounded,
+        kind: rounded < 0 ? "negative" : "plain"
+      };
+    }
+
+    function isValidFinalValue(value, settings) {
+      if (!Number.isFinite(value) || Math.abs(value) < 0.01) return false;
+      if (!settings.allowNegative && value <= 0) return false;
+      const cap = Math.max(settings.numberRange * 3, 30);
+      return Math.abs(value) <= cap;
+    }
+
+    function startLevel(level = state.level) {
+      if (!canStartGame()) {
+        showOutOfLives();
+        return;
+      }
+
+      closeAllModals();
+      clearTimer();
+
+      const levelData = generateLevel(level);
+      state.level = level;
+      state.lives = STRIKES_PER_GAME;
+      state.currentTiles = levelData.tiles;
+      state.upper = [];
+      state.lower = [];
+      state.tray = levelData.tiles.map((tile) => tile.id);
+      state.timeLeft = levelData.settings.timeLimit + state.bonusTime;
+      state.bonusTime = 0;
+      state.solved = false;
+      state.isPlaying = true;
+      state.isPaused = false;
+      state.lastAttemptSignature = "";
+
+      saveGame();
+      showScreen("game");
+      renderGame();
+      startTimer();
+    }
+
+    function renderGame() {
+      els.levelLabel.textContent = `Lv. ${state.level}`;
+      renderLifeBank();
+      renderHearts();
+      renderTimer();
+      renderZone("upper");
+      renderZone("lower");
+      renderTray();
+    }
+
+    function renderHearts() {
+      els.hearts.innerHTML = "";
+      for (let i = 0; i < STRIKES_PER_GAME; i++) {
+        const heart = document.createElement("span");
+        heart.className = "material-symbols-outlined" + (i >= state.lives ? " empty" : "");
+        heart.style.fontVariationSettings = i < state.lives ? "'FILL' 1" : "'FILL' 0";
+        heart.textContent = "favorite";
+        els.hearts.appendChild(heart);
+      }
+    }
+
+    function renderTimer() {
+      els.timer.textContent = formatTime(state.timeLeft);
+      els.timer.classList.toggle("is-low", state.timeLeft <= 10);
+    }
+
+    function renderZone(zone) {
+      const grid = zone === "upper" ? els.upperGrid : els.lowerGrid;
+      const ids = state[zone];
+      grid.innerHTML = "";
+      ids.forEach((id) => grid.appendChild(createTileElement(getTile(id), zone)));
+    }
+
+    function renderTray() {
+      els.trayRow.innerHTML = "";
+      setTrayMetrics();
+      state.tray.forEach((id) => els.trayRow.appendChild(createTileElement(getTile(id), "tray")));
+    }
+
+    function setTrayMetrics() {
+      const count = Math.max(1, state.currentTiles.length || state.tray.length || 4);
+      const rowWidth = els.trayRow.clientWidth
+        || Math.min(360, Math.max(220, (window.innerWidth || 390) - 80));
+      const gap = count >= 10 ? 4 : count >= 8 ? 5 : count >= 6 ? 6 : 8;
+      const available = rowWidth - gap * (count - 1);
+      const maxSize = count <= 4 ? 64 : count <= 6 ? 58 : count <= 8 ? 48 : 40;
+      const tileSize = Math.max(24, Math.min(maxSize, Math.floor(available / count)));
+
+      els.trayRow.style.setProperty("--tray-gap", `${gap}px`);
+      els.trayRow.style.setProperty("--tray-tile-size", `${tileSize}px`);
+    }
+
+    function createTileElement(tile, zone) {
+      const div = document.createElement("div");
+      const sizeClass = zone === "tray" ? "tray-tile" : "board-tile";
+      div.className = `tile ${sizeClass} ${tile.color} tile-shadow ${getLengthClass(tile.label)}`;
+      div.dataset.tileId = tile.id;
+      div.dataset.zone = zone;
+      div.setAttribute("role", "button");
+      div.setAttribute("aria-label", `Tile ${tile.label}`);
+
+      if (zone === "tray") {
+        const up = document.createElement("span");
+        up.className = "material-symbols-outlined arrow up";
+        up.textContent = "keyboard_arrow_up";
+        const down = document.createElement("span");
+        down.className = "material-symbols-outlined arrow down";
+        down.textContent = "keyboard_arrow_down";
+        div.appendChild(up);
+      }
+
+      const label = document.createElement("span");
+      label.className = "tile-number";
+      label.textContent = tile.label;
+      div.appendChild(label);
+
+      if (zone === "tray") {
+        const down = document.createElement("span");
+        down.className = "material-symbols-outlined arrow down";
+        down.textContent = "keyboard_arrow_down";
+        div.appendChild(down);
+      }
+
+      div.addEventListener("pointerdown", onTilePointerDown);
+      div.addEventListener("pointerup", onTilePointerUp);
+      div.addEventListener("pointercancel", onTilePointerCancel);
+      return div;
+    }
+
+    function getLengthClass(label) {
+      if (String(label).length >= 6) return "xlong";
+      if (String(label).length >= 4) return "long";
+      return "";
+    }
+
+    function onTilePointerDown(event) {
+      if (!state.isPlaying || state.solved) return;
+      const tile = event.currentTarget;
+      tile.setPointerCapture?.(event.pointerId);
+      tile.classList.add("is-dragging");
+      state.drag = {
+        id: tile.dataset.tileId,
+        zone: tile.dataset.zone,
+        startX: event.clientX,
+        startY: event.clientY,
+        startedAt: Date.now()
+      };
+    }
+
+    function onTilePointerUp(event) {
+      const tile = event.currentTarget;
+      tile.classList.remove("is-dragging");
+      if (!state.drag || state.drag.id !== tile.dataset.tileId) return;
+
+      const dy = event.clientY - state.drag.startY;
+      const dx = event.clientX - state.drag.startX;
+      const moved = Math.abs(dy) > 18 || Math.abs(dx) > 18;
+      let targetZone = null;
+
+      if (state.drag.zone === "tray") {
+        if (dy < -18) targetZone = "upper";
+        if (dy > 18) targetZone = "lower";
+        if (!targetZone && !moved) {
+          const rect = tile.getBoundingClientRect();
+          targetZone = event.clientY < rect.top + rect.height / 2 ? "upper" : "lower";
+        }
+      } else {
+        if (dy < -18) targetZone = "upper";
+        if (dy > 18) targetZone = "lower";
+        if (!targetZone && !moved) targetZone = "tray";
+      }
+
+      state.drag = null;
+      if (targetZone) moveTile(tile.dataset.tileId, targetZone);
+    }
+
+    function onTilePointerCancel(event) {
+      event.currentTarget.classList.remove("is-dragging");
+      state.drag = null;
+    }
+
+    function moveTile(id, targetZone) {
+      if (state.solved) return;
+      removeTileFromAllZones(id);
+      state[targetZone].push(id);
+      state.lastAttemptSignature = "";
+      renderGame();
+      highlightZone(targetZone);
+      playTone(360, 0.045);
+      vibrate(12);
+
+      if (state.tray.length === 0) {
+        window.setTimeout(checkAttempt, 360);
+      }
+    }
+
+    function removeTileFromAllZones(id) {
+      state.upper = state.upper.filter((tileId) => tileId !== id);
+      state.lower = state.lower.filter((tileId) => tileId !== id);
+      state.tray = state.tray.filter((tileId) => tileId !== id);
+    }
+
+    function highlightZone(zone) {
+      const el = zone === "upper" ? els.upperZone : zone === "lower" ? els.lowerZone : null;
+      if (!el) return;
+      el.classList.add("is-targeted");
+      window.setTimeout(() => el.classList.remove("is-targeted"), 240);
+    }
+
+    function checkAttempt() {
+      if (state.solved || state.tray.length > 0 || !state.isPlaying) return;
+      const signature = `${state.upper.join(",")}|${state.lower.join(",")}`;
+      if (signature === state.lastAttemptSignature) return;
+      state.lastAttemptSignature = signature;
+
+      const upperSum = sumZone("upper");
+      const lowerSum = sumZone("lower");
+      if (Math.abs(upperSum - lowerSum) < 0.01) {
+        handleWin();
+      } else {
+        handleWrongAttempt();
+      }
+    }
+
+    function handleWin() {
+      state.solved = true;
+      state.isPlaying = false;
+      clearTimer();
+      els.upperZone.classList.add("success");
+      els.lowerZone.classList.add("success");
+      els.board.classList.add("solved-pop");
+      playTone(620, 0.08);
+      window.setTimeout(() => playTone(840, 0.09), 90);
+      vibrate([20, 40, 20]);
+      burstConfetti();
+
+      const nextLevel = state.level + 1;
+      state.bestLevel = Math.max(state.bestLevel, nextLevel);
+      state.level = nextLevel;
+      state.bonusTime = 15;
+      saveGame();
+      els.resultTitle.textContent = "Balanced";
+      els.nextLevelStat.textContent = `Lv. ${nextLevel}`;
+
+      window.setTimeout(() => {
+        els.board.classList.remove("solved-pop");
+        openModal("result-modal");
+      }, 620);
+    }
+
+    function handleWrongAttempt() {
+      state.lives -= 1;
+      renderHearts();
+      els.upperZone.classList.add("warning");
+      els.lowerZone.classList.add("warning");
+      els.board.classList.add("board-flash");
+      showToast("Try again");
+      playTone(140, 0.08);
+      vibrate([25, 30, 25]);
+
+      window.setTimeout(() => {
+        els.upperZone.classList.remove("warning");
+        els.lowerZone.classList.remove("warning");
+        els.board.classList.remove("board-flash");
+      }, 420);
+
+      if (state.lives <= 0) {
+        endGame("No lives left");
+      }
+    }
+
+    function endGame(title) {
+      spendGameLife();
+      state.isPlaying = false;
+      state.solved = true;
+      clearTimer();
+      els.gameoverTitle.textContent = state.gameLives <= 0 ? "No lives left" : title;
+      renderGameOverState();
+      window.setTimeout(() => {
+        renderGameOverState();
+        openModal("gameover-modal");
+      }, 380);
+    }
+
+    function startTimer() {
+      clearTimer();
+      state.timerId = window.setInterval(() => {
+        if (!state.isPlaying || state.isPaused || state.solved || state.activeScreen !== "game") return;
+        state.timeLeft -= 1;
+        renderTimer();
+        if (state.timeLeft <= 0) {
+          state.timeLeft = 0;
+          renderTimer();
+          endGame("Time is up");
+        }
+      }, 1000);
+    }
+
+    function clearTimer() {
+      if (state.timerId) {
+        window.clearInterval(state.timerId);
+        state.timerId = null;
+      }
+    }
+
+    function sumZone(zone) {
+      return state[zone].reduce((sum, id) => sum + getTile(id).value, 0);
+    }
+
+    function getTile(id) {
+      return state.currentTiles.find((tile) => tile.id === id);
+    }
+
+    function showToast(message) {
+      els.toast.textContent = message;
+      els.toast.classList.add("is-active");
+      window.clearTimeout(showToast.timeout);
+      showToast.timeout = window.setTimeout(() => els.toast.classList.remove("is-active"), 1100);
+    }
+
+    function burstConfetti() {
+      els.confettiLayer.innerHTML = "";
+      const colors = ["#89ceff", "#b50036", "#ffb86e", "#98d85f", "#ffdc2f", "#c735e7"];
+      for (let i = 0; i < 28; i++) {
+        const piece = document.createElement("span");
+        piece.className = "confetti";
+        piece.style.left = `${randInt(8, 92)}vw`;
+        piece.style.top = `${randInt(-12, 10)}vh`;
+        piece.style.background = colors[i % colors.length];
+        piece.style.setProperty("--dx", `${randInt(-80, 80)}px`);
+        piece.style.animationDelay = `${Math.random() * 180}ms`;
+        els.confettiLayer.appendChild(piece);
+      }
+      window.setTimeout(() => els.confettiLayer.innerHTML = "", 1300);
+    }
+
+    function startRewardedAd() {
+      if (state.adTimerId) return;
+      state.adSecondsLeft = REWARDED_AD_SECONDS;
+      els.adCount.textContent = state.adSecondsLeft;
+      els.fullscreenAd.classList.add("is-active");
+
+      state.adTimerId = window.setInterval(() => {
+        state.adSecondsLeft -= 1;
+        els.adCount.textContent = Math.max(0, state.adSecondsLeft);
+
+        if (state.adSecondsLeft <= 0) {
+          window.clearInterval(state.adTimerId);
+          state.adTimerId = null;
+          els.fullscreenAd.classList.remove("is-active");
+          els.gameoverTitle.textContent = "Lives refilled";
+          restoreGameLives(true);
+          renderGameOverState();
+        }
+      }, 1000);
+    }
+
+    function playTone(frequency, duration) {
+      if (!state.settings.sound) return;
+      try {
+        const AudioContext = window.AudioContext || window.webkitAudioContext;
+        const context = new AudioContext();
+        const oscillator = context.createOscillator();
+        const gain = context.createGain();
+        oscillator.type = "sine";
+        oscillator.frequency.value = frequency;
+        gain.gain.setValueAtTime(0.04, context.currentTime);
+        gain.gain.exponentialRampToValueAtTime(0.001, context.currentTime + duration);
+        oscillator.connect(gain);
+        gain.connect(context.destination);
+        oscillator.start();
+        oscillator.stop(context.currentTime + duration);
+      } catch {
+        // Sound is optional.
+      }
+    }
+
+    function vibrate(pattern) {
+      if (state.settings.vibration && navigator.vibrate) {
+        navigator.vibrate(pattern);
+      }
+    }
+
+    function formatTime(seconds) {
+      const safe = Math.max(0, seconds);
+      const mins = Math.floor(safe / 60);
+      const secs = safe % 60;
+      return `${String(mins).padStart(2, "0")}:${String(secs).padStart(2, "0")}`;
+    }
+
+    function toSuperscript(number) {
+      const map = {
+        "-": "⁻",
+        "0": "⁰",
+        "1": "¹",
+        "2": "²",
+        "3": "³",
+        "4": "⁴",
+        "5": "⁵",
+        "6": "⁶",
+        "7": "⁷",
+        "8": "⁸",
+        "9": "⁹"
+      };
+      return String(number).split("").map((char) => map[char] || char).join("");
+    }
+
+    function formatRoot(degree, radicand) {
+      if (degree === 2) return `√${radicand}`;
+      if (degree === 3) return `∛${radicand}`;
+      if (degree === 4) return `∜${radicand}`;
+      return `${toSuperscript(degree)}√${radicand}`;
+    }
+
+    function roundValue(value) {
+      return Math.round(value * 100) / 100;
+    }
+
+    function randInt(min, max) {
+      const low = Math.ceil(Math.min(min, max));
+      const high = Math.floor(Math.max(min, max));
+      return Math.floor(Math.random() * (high - low + 1)) + low;
+    }
+
+    function shuffle(array) {
+      const copy = [...array];
+      for (let i = copy.length - 1; i > 0; i--) {
+        const j = Math.floor(Math.random() * (i + 1));
+        [copy[i], copy[j]] = [copy[j], copy[i]];
+      }
+      return copy;
+    }
+
+    function wireEvents() {
+      $("#play-button").addEventListener("click", () => startLevel(state.level));
+      $("#new-game-button").addEventListener("click", () => {
+        state.level = 1;
+        state.bonusTime = 0;
+        saveGame();
+        startLevel(1);
+      });
+      $("#menu-settings-button").addEventListener("click", () => openModal("settings-modal"));
+      $("#how-button").addEventListener("click", () => openModal("rules-modal"));
+      $("#pause-button").addEventListener("click", () => {
+        if (!state.solved) openModal("pause-modal");
+      });
+      $("#resume-button").addEventListener("click", () => closeModal("pause-modal"));
+      $("#restart-button").addEventListener("click", () => startLevel(state.level));
+      $("#pause-settings-button").addEventListener("click", () => openModal("settings-modal"));
+      $("#quit-button").addEventListener("click", () => {
+        clearTimer();
+        closeAllModals();
+        state.isPlaying = false;
+        showScreen("menu");
+      });
+      $("#next-level-button").addEventListener("click", () => startLevel(state.level));
+      $("#try-again-button").addEventListener("click", () => startLevel(state.level));
+      $("#gameover-menu-button").addEventListener("click", () => {
+        closeAllModals();
+        showScreen("menu");
+      });
+      $("#reset-progress-button").addEventListener("click", () => {
+        state.level = 1;
+        state.bestLevel = 1;
+        state.bonusTime = 0;
+        state.gameLives = MAX_GAME_LIVES;
+        state.livesReadyAt = null;
+        clearRechargeTimer();
+        saveGame();
+        renderMenu();
+        renderLifeBank();
+        renderGameOverState();
+        showToast("Progress reset");
+      });
+      els.watchAdButton.addEventListener("click", startRewardedAd);
+
+      els.soundToggle.addEventListener("click", () => {
+        state.settings.sound = !state.settings.sound;
+        saveGame();
+        renderToggles();
+      });
+      els.vibrationToggle.addEventListener("click", () => {
+        state.settings.vibration = !state.settings.vibration;
+        saveGame();
+        renderToggles();
+      });
+
+      $$("[data-close-modal]").forEach((button) => {
+        button.addEventListener("click", () => closeModal(button.dataset.closeModal));
+      });
+
+      document.addEventListener("keydown", (event) => {
+        if (event.key === "Escape") {
+          if (els.settingsModal.classList.contains("is-active")) closeModal("settings-modal");
+          else if (els.rulesModal.classList.contains("is-active")) closeModal("rules-modal");
+          else if (els.pauseModal.classList.contains("is-active")) closeModal("pause-modal");
+          else if (state.activeScreen === "game" && !state.solved) openModal("pause-modal");
+        }
+      });
+
+      window.addEventListener("resize", () => {
+        if (state.activeScreen === "game") renderTray();
+      });
+    }
+
+    loadSave();
+    wireEvents();
+    renderMenu();
+    renderToggles();
+  </script>
+</body>
+</html>

@@ -452,24 +452,6 @@
       font-size: clamp(8px, calc(var(--tray-tile-size, 64px) * 0.23), 15px);
     }
 
-    .tile .arrow {
-      position: absolute;
-      font-size: clamp(8px, calc(var(--tray-tile-size, 64px) * 0.19), 12px);
-      color: color-mix(in srgb, var(--tile-text) 55%, transparent);
-      transition: color 150ms ease;
-    }
-
-    .tile:hover .arrow {
-      color: var(--tile-text);
-    }
-
-    .tile .arrow.up {
-      top: 3px;
-    }
-
-    .tile .arrow.down {
-      bottom: 3px;
-    }
 
     .tile-blue {
       --tile-bg: var(--primary-container);
@@ -1942,29 +1924,12 @@
       div.setAttribute("role", "button");
       div.setAttribute("aria-label", `Tile ${tile.label}`);
 
-      if (zone === "tray") {
-        const up = document.createElement("span");
-        up.className = "material-symbols-outlined arrow up";
-        up.dataset.iconName = "keyboard_arrow_up";
-        up.textContent = iconGlyph("keyboard_arrow_up");
-        const down = document.createElement("span");
-        down.className = "material-symbols-outlined arrow down";
-        down.dataset.iconName = "keyboard_arrow_down";
-        down.textContent = iconGlyph("keyboard_arrow_down");
-        div.appendChild(up);
-      }
-
       const label = document.createElement("span");
       label.className = "tile-number";
       label.textContent = tile.label;
       div.appendChild(label);
 
       if (zone === "tray") {
-        const down = document.createElement("span");
-        down.className = "material-symbols-outlined arrow down";
-        down.dataset.iconName = "keyboard_arrow_down";
-        down.textContent = iconGlyph("keyboard_arrow_down");
-        div.appendChild(down);
       }
 
       div.addEventListener("pointerdown", onTilePointerDown);

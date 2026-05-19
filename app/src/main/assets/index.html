@@ -1589,36 +1589,98 @@
     }
 
     function getLevelSettings(level) {
-      const levelsPerFloor = 12;
-      const levelsPerStep = 3;
-      const floor = Math.floor((level - 1) / levelsPerFloor) + 1;
-      const levelInsideFloor = (level - 1) % levelsPerFloor;
-      const step = Math.floor(levelInsideFloor / levelsPerStep);
-      const endlessFloor = Math.max(0, floor - 5);
-      const blockCount = blockSteps[step];
-      const numberRange = floor <= 5
-        ? 18 + floor * 7 + step * 9
-        : Math.round(55 * Math.pow(1.25, endlessFloor) + step * 18);
-      const baseTime = floor <= 5
-        ? 72 - floor * 3 - step * 4
-        : 48 - endlessFloor * 2 - step * 3;
+      // Phase boundaries (cumulative level counts)
+      const P1_END = 88;   // 4/6 tiles, plain→all mechanics
+      const P2_END = 216;  // 6/8 tiles, same mechanic cycle
+      const P3_END = 344;  // 6/8 tiles, + negative squares/roots
+      const P4_END = 472;  // 6/8 tiles, + x³/∛x
+
+      // Wave level counts per wave index (0-15) for each phase group
+      const P1_COUNTS = [3,3,3,3, 5,5,5,5, 7,7,7,7,7,7,7,7];   // 12+20+56=88
+      const P2_COUNTS = [5,5,5,5, 7,7,7,7, 10,10,10,10,10,10,10,10]; // 20+28+80=128
+
+      let phaseNum, phaseStart, waveCounts;
+      if      (level <= P1_END) { phaseNum = 1; phaseStart = 1;        waveCounts = P1_COUNTS; }
+      else if (level <= P2_END) { phaseNum = 2; phaseStart = P1_END+1; waveCounts = P2_COUNTS; }
+      else if (level <= P3_END) { phaseNum = 3; phaseStart = P2_END+1; waveCounts = P2_COUNTS; }
+      else if (level <= P4_END) { phaseNum = 4; phaseStart = P3_END+1; waveCounts = P2_COUNTS; }
+      else                      { phaseNum = 5; phaseStart = P4_END+1; waveCounts = P2_COUNTS; }
+
+      // Find which wave (0-based index) and position within it
+      let rem = level - phaseStart;
+      let wi = 0;
+      while (wi < 15 && rem >= waveCounts[wi]) { rem -= waveCounts[wi]; wi++; }
+      const waveNum      = wi + 1;                                        // 1-16
+      const levelsInWave = waveCounts[wi];
+      const posInWave    = rem;                                            // 0-based
+      const waveProgress = levelsInWave > 1 ? posInWave / (levelsInWave - 1) : 0; // 0→1
+
+      // Mechanics: each pair of waves shares a combo (3-bit binary on pair index)
+      // pair 0=plain, 1=+neg, 2=+sq, 3=+neg+sq, 4=+root, 5=+neg+root, 6=+sq+root, 7=all
+      const pairIdx  = Math.floor((waveNum - 1) / 2); // 0-7
+      const allowNeg  = !!(pairIdx & 1);
+      const allowSq   = !!(pairIdx & 2);
+      const allowRoot = !!(pairIdx & 4);
+
+      // Phase 4+ adds x³/∛x; endless escalates further
+      let maxPow = phaseNum >= 4 ? 3 : 2;
+      let maxRootDeg = phaseNum >= 4 ? 3 : 2;
+      if (phaseNum >= 5) {
+        const bonus = Math.floor((level - P4_END - 1) / 128);
+        maxPow    = 4 + bonus;
+        maxRootDeg = 4 + bonus;
+      }
+
+      // Tile count: odd waves use base tiles, even waves switch to higher tiles
+      // at 60% wave progress (sawtooth: numbers reset when tiles increase)
+      const isEvenWave = waveNum % 2 === 0;
+      const baseTiles  = phaseNum === 1 ? 4 : 6;
+      const highTiles  = phaseNum === 1 ? 6 : 8;
+      const blockCount = (isEvenWave && waveProgress >= 0.6) ? highTiles : baseTiles;
+
+      // Number range: sawtooth within each wave, slowly rising baseline across waves
+      // Phase 1 scale = 1×; Phase 2 = 2.2×; Phase 3 = 3.2×; Phase 4 = 4.5×; Endless = 6×
+      const WAVE_RANGES = [
+        [ 8, 15], [10, 22],  // W1-W2  plain
+        [ 8, 17], [12, 26],  // W3-W4  +neg
+        [10, 20], [14, 30],  // W5-W6  +sq
+        [12, 24], [16, 34],  // W7-W8  +neg+sq
+        [14, 27], [18, 37],  // W9-W10 +root
+        [16, 31], [20, 42],  // W11-W12 +neg+root
+        [18, 35], [22, 46],  // W13-W14 +sq+root
+        [20, 39], [24, 52],  // W15-W16 all
+      ];
+      const PHASE_SCALE = [1, 2.2, 3.2, 4.5, 6.0];
+      const scale   = PHASE_SCALE[Math.min(phaseNum - 1, 4)];
+      const [rMin, rMax] = WAVE_RANGES[wi];
+      const numberRange  = Math.round(scale * (rMin + waveProgress * (rMax - rMin)));
+
+      // Timer: generous early, tightens with phase progression and wave position
+      const timeLimit = Math.max(20, Math.round(
+        70 - (phaseNum - 1) * 8 - (wi / 15) * 15 - waveProgress * 5
+      ));
+
+      // Mechanic chances: scale with wave progress (gentle at start, fuller at end)
+      const chScale      = 0.25 + waveProgress * 0.45;
+      const negChance    = allowNeg  ? chScale * 0.50 : 0;  // up to ~31%
+      const powChance    = allowSq   ? chScale * 0.42 : 0;  // up to ~31%
+      const rootChance   = allowRoot ? chScale * 0.38 : 0;  // up to ~32%
 
       return {
-        level,
-        floor,
-        step,
-        blockCount,
-        numbersPerSide: blockCount / 2,
-        numberRange,
-        timeLimit: Math.max(12, baseTime),
-        allowNegative: floor >= 2,
-        allowPower: floor >= 3,
-        allowRoot: floor >= 4,
-        negativeChance: floor >= 2 ? Math.min(0.12 + step * 0.07 + endlessFloor * 0.025, 0.58) : 0,
-        powerChance: floor >= 3 ? Math.min(0.22 + step * 0.035 + endlessFloor * 0.018, 0.42) : 0,
-        rootChance: floor >= 4 ? Math.min(0.18 + step * 0.035 + endlessFloor * 0.018, 0.42) : 0,
-        maxPower: floor >= 3 ? (floor > 5 ? 2 + endlessFloor : 2) : 1,
-        maxRootDegree: floor >= 4 ? (floor > 5 ? 2 + endlessFloor : 2) : 1
+        level, phaseNum, waveNum, posInWave, waveProgress,
+        blockCount, numbersPerSide: blockCount / 2,
+        numberRange, timeLimit,
+        allowNegative: allowNeg,
+        allowPower:    allowSq,
+        allowRoot,
+        negativeChance: negChance,
+        powerChance:    powChance,
+        rootChance,
+        maxPower:      maxPow,
+        maxRootDegree: maxRootDeg,
+        // shims used by generateLevel and tileFromValue
+        floor: phaseNum,
+        step:  Math.floor(waveProgress * 3),
       };
     }
 
@@ -1648,9 +1710,9 @@
 
     function chooseForcedKinds(settings, side) {
       const forced = [];
-      if (settings.floor === 2 && side === "upper") forced.push("negative");
-      if (settings.floor >= 3 && side === "upper") forced.push("power");
-      if (settings.floor >= 4 && side === "lower") forced.push("root");
+      if (settings.allowNegative && side === "upper") forced.push("negative");
+      if (settings.allowPower    && side === "upper") forced.push("power");
+      if (settings.allowRoot     && side === "lower") forced.push("root");
       return forced;
     }
 
@@ -1757,7 +1819,7 @@
 
     function tileFromValue(value, settings, forcePlain = false) {
       const rounded = roundValue(value);
-      const rootWrapLimit = settings.floor <= 5
+      const rootWrapLimit = settings.phaseNum <= 1
         ? 12
         : Math.max(12, Math.round(settings.numberRange / 6));
       if (!forcePlain && rounded > 1 && rounded <= rootWrapLimit && settings.allowRoot && Math.random() < settings.rootChance * 0.45) {

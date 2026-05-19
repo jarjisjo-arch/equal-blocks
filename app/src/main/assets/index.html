@@ -641,6 +641,18 @@
       color: var(--on-error-container);
     }
 
+    .action-button.daily {
+      background: linear-gradient(135deg, var(--primary-container), var(--tertiary-container));
+      color: var(--on-surface);
+    }
+
+    .action-button.daily.is-done {
+      background: var(--surface-container-high);
+      color: var(--on-surface-variant);
+      border: 1px solid rgba(62, 72, 80, 0.28);
+      box-shadow: 0 2px 0 rgba(0, 0, 0, 0.2), 0 4px 8px rgba(0, 0, 0, 0.12), inset 0 1px 2px rgba(255, 255, 255, 0.1);
+    }
+
     .mini-stats {
       display: grid;
       grid-template-columns: repeat(2, 1fr);
@@ -879,6 +891,25 @@
       animation: confetti-fall 900ms ease forwards;
     }
 
+    .daily-result-text {
+      background: var(--surface-container-low);
+      border: 1px solid rgba(62, 72, 80, 0.22);
+      border-radius: 12px;
+      padding: 16px;
+      color: var(--on-surface);
+      font-size: 14px;
+      line-height: 22px;
+      font-weight: 700;
+      white-space: pre-wrap;
+      text-align: center;
+    }
+
+    .share-row {
+      display: grid;
+      grid-template-columns: 1fr 1fr;
+      gap: 10px;
+    }
+
     @keyframes timer-pulse {
       from { opacity: 0.75; }
       to { opacity: 1; }
@@ -986,6 +1017,10 @@
           <button class="action-button" id="play-button">
             <span class="material-symbols-outlined" aria-hidden="true">play_arrow</span>
             Play
+          </button>
+          <button class="action-button daily" id="daily-button">
+            <span class="material-symbols-outlined" aria-hidden="true">calendar_today</span>
+            <span class="daily-btn-label">Daily Challenge</span>
           </button>
           <button class="action-button secondary" id="new-game-button">
             <span class="material-symbols-outlined" aria-hidden="true">refresh</span>
@@ -1204,6 +1239,30 @@
     </div>
   </div>
 
+  <div class="modal" id="daily-result-modal" role="dialog" aria-modal="true" aria-labelledby="daily-result-title">
+    <div class="modal-panel recessed-tray">
+      <div class="modal-head">
+        <h2 class="modal-title" id="daily-result-title">Daily #1</h2>
+        <button class="icon-button" data-close-modal="daily-result-modal" aria-label="Close daily result">
+          <span class="material-symbols-outlined" aria-hidden="true">close</span>
+        </button>
+      </div>
+      <div class="modal-body">
+        <div class="daily-result-text" id="daily-result-text"></div>
+        <div class="mini-stats" id="daily-result-stats"></div>
+        <div class="share-row">
+          <button class="action-button" id="daily-share-button">
+            <span class="material-symbols-outlined" aria-hidden="true">share</span>
+            Share
+          </button>
+          <button class="action-button secondary" data-close-modal="daily-result-modal">
+            Close
+          </button>
+        </div>
+      </div>
+    </div>
+  </div>
+
   <div class="toast" id="toast" role="status" aria-live="polite"></div>
   <div class="confetti-layer" id="confetti-layer"></div>
   <div class="fullscreen-ad" id="fullscreen-ad" aria-live="polite">
@@ -1252,7 +1311,10 @@
       balance: "=",
       timer: "◷",
       keyboard_arrow_up: "↑",
-      keyboard_arrow_down: "↓"
+      keyboard_arrow_down: "↓",
+      calendar_today: "◈",
+      check_circle: "✓",
+      share: "↑"
     };
 
     const state = {
@@ -1280,7 +1342,15 @@
         vibration: true
       },
       drag: null,
-      lastAttemptSignature: ""
+      lastAttemptSignature: "",
+      daily: {
+        date: null,
+        won: null,
+        timeTaken: null,
+        streak: 0
+      },
+      isDailyMode: false,
+      dailyStartTime: null
     };
 
     const $ = (selector) => document.querySelector(selector);
@@ -1349,6 +1419,11 @@
         state.livesReadyAt = Number.isFinite(saved.livesReadyAt) ? saved.livesReadyAt : null;
         state.settings.sound = saved.settings?.sound !== false;
         state.settings.vibration = saved.settings?.vibration !== false;
+        const d = saved.daily || {};
+        state.daily.date = typeof d.date === "string" ? d.date : null;
+        state.daily.won = typeof d.won === "boolean" ? d.won : null;
+        state.daily.timeTaken = Number.isFinite(d.timeTaken) ? d.timeTaken : null;
+        state.daily.streak = Number.isFinite(d.streak) ? Math.max(0, d.streak) : 0;
         syncLifeRecharge();
         if (state.gameLives <= 0) startLifeRecharge();
       } catch {
@@ -1365,7 +1440,8 @@
         bestLevel: state.bestLevel,
         gameLives: state.gameLives,
         livesReadyAt: state.livesReadyAt,
-        settings: state.settings
+        settings: state.settings,
+        daily: state.daily
       }));
     }
 
@@ -1396,7 +1472,7 @@
     }
 
     function closeAllModals() {
-      $$(".modal").forEach((modal) => modal.classList.remove("is-active"));
+      $$(" .modal").forEach((modal) => modal.classList.remove("is-active"));
       state.isPaused = false;
     }
 
@@ -1407,6 +1483,7 @@
       els.menuBankLives.textContent = `${state.gameLives}/${MAX_GAME_LIVES}`;
       els.menuRefillTime.textContent = state.gameLives > 0 ? "Ready" : formatTime(getRechargeSecondsLeft());
       renderLifeBank();
+      updateDailyButton();
     }
 
     function renderToggles() {
@@ -1731,6 +1808,7 @@
       state.isPlaying = true;
       state.isPaused = false;
       state.lastAttemptSignature = "";
+      state.isDailyMode = false;
 
       saveGame();
       showScreen("game");
@@ -1739,7 +1817,7 @@
     }
 
     function renderGame() {
-      els.levelLabel.textContent = `Lv. ${state.level}`;
+      els.levelLabel.textContent = state.isDailyMode ? `Daily` : `Lv. ${state.level}`;
       renderLifeBank();
       renderHearts();
       renderTimer();
@@ -1938,6 +2016,19 @@
       vibrate([20, 40, 20]);
       burstConfetti();
 
+      if (state.isDailyMode) {
+        const elapsed = state.dailyStartTime
+          ? Math.round((Date.now() - state.dailyStartTime) / 1000)
+          : null;
+        window.setTimeout(() => {
+          els.board.classList.remove("solved-pop");
+          els.upperZone.classList.remove("success");
+          els.lowerZone.classList.remove("success");
+        }, 620);
+        completeDailyChallenge(true, elapsed);
+        return;
+      }
+
       const nextLevel = state.level + 1;
       state.bestLevel = Math.max(state.bestLevel, nextLevel);
       state.level = nextLevel;
@@ -1974,6 +2065,14 @@
     }
 
     function endGame(title) {
+      if (state.isDailyMode) {
+        state.isPlaying = false;
+        state.solved = true;
+        clearTimer();
+        window.setTimeout(() => completeDailyChallenge(false, null), 380);
+        return;
+      }
+
       spendGameLife();
       state.isPlaying = false;
       state.solved = true;
@@ -2135,6 +2234,138 @@
       return copy;
     }
 
+    // --- Daily Challenge ---
+
+    function mulberry32(seed) {
+      return function () {
+        let t = (seed += 0x6D2B79F5);
+        t = Math.imul(t ^ (t >>> 15), t | 1);
+        t ^= t + Math.imul(t ^ (t >>> 7), t | 61);
+        return ((t ^ (t >>> 14)) >>> 0) / 4294967296;
+      };
+    }
+
+    function getDailyDateStr() {
+      const now = new Date();
+      return `${now.getFullYear()}-${String(now.getMonth() + 1).padStart(2, "0")}-${String(now.getDate()).padStart(2, "0")}`;
+    }
+
+    function getDayNumber() {
+      return Math.floor((Date.now() - new Date("2025-01-01").getTime()) / 86400000) + 1;
+    }
+
+    function isDailyDone() {
+      return state.daily.date === getDailyDateStr();
+    }
+
+    function startDailyChallenge() {
+      if (isDailyDone()) {
+        showDailyResultModal();
+        return;
+      }
+
+      closeAllModals();
+      clearTimer();
+
+      const dayNum = getDayNumber();
+      const dailyLevel = ((dayNum - 1) % 30) + 5;
+      const seed = parseInt(getDailyDateStr().replace(/-/g, ""), 10);
+      const rng = mulberry32(seed);
+      const origRandom = Math.random;
+      Math.random = rng;
+      const levelData = generateLevel(dailyLevel);
+      Math.random = origRandom;
+
+      state.isDailyMode = true;
+      state.dailyStartTime = Date.now();
+      state.lives = STRIKES_PER_GAME;
+      state.currentTiles = levelData.tiles;
+      state.upper = [];
+      state.lower = [];
+      state.tray = levelData.tiles.map((tile) => tile.id);
+      state.timeLeft = levelData.settings.timeLimit;
+      state.bonusTime = 0;
+      state.solved = false;
+      state.isPlaying = true;
+      state.isPaused = false;
+      state.lastAttemptSignature = "";
+
+      showScreen("game");
+      renderGame();
+      startTimer();
+    }
+
+    function completeDailyChallenge(won, timeTaken) {
+      state.isDailyMode = false;
+      const today = getDailyDateStr();
+      const yesterday = new Date();
+      yesterday.setDate(yesterday.getDate() - 1);
+      const yStr = `${yesterday.getFullYear()}-${String(yesterday.getMonth() + 1).padStart(2, "0")}-${String(yesterday.getDate()).padStart(2, "0")}`;
+
+      if (won) {
+        state.daily.streak = state.daily.date === yStr ? state.daily.streak + 1 : 1;
+      } else if (state.daily.date !== today) {
+        state.daily.streak = 0;
+      }
+
+      state.daily.date = today;
+      state.daily.won = won;
+      state.daily.timeTaken = timeTaken;
+      saveGame();
+      updateDailyButton();
+      window.setTimeout(showDailyResultModal, won ? 700 : 420);
+    }
+
+    function getDailyShareText() {
+      const dayNum = getDayNumber();
+      const { won, timeTaken, streak } = state.daily;
+      let text = `Equal Blocks Daily #${dayNum}\n`;
+      text += won ? `✅ Balanced in ${formatTime(timeTaken)}\n` : "❌ Not solved today\n";
+      if (streak > 1) text += `🔥 ${streak}-day streak\n`;
+      text += "\nequal-blocks.app";
+      return text;
+    }
+
+    function showDailyResultModal() {
+      const dayNum = getDayNumber();
+      const { won, timeTaken, streak } = state.daily;
+
+      closeAllModals();
+      showScreen("menu");
+
+      document.getElementById("daily-result-title").textContent = `Daily #${dayNum}`;
+      document.getElementById("daily-result-text").textContent = getDailyShareText();
+
+      const statsEl = document.getElementById("daily-result-stats");
+      statsEl.innerHTML = "";
+      const statData = [
+        { label: "RESULT", value: won ? "Solved ✅" : "Failed ❌" },
+        { label: "STREAK", value: streak > 0 ? `${streak} 🔥` : "—" }
+      ];
+      if (won && timeTaken != null) {
+        statData.push({ label: "TIME", value: formatTime(timeTaken) });
+      }
+      statData.forEach(({ label, value }) => {
+        const stat = document.createElement("div");
+        stat.className = "stat";
+        stat.innerHTML = `<span class="stat-label">${label}</span><span class="stat-value" style="font-size:18px">${value}</span>`;
+        statsEl.appendChild(stat);
+      });
+
+      openModal("daily-result-modal");
+    }
+
+    function updateDailyButton() {
+      const btn = document.getElementById("daily-button");
+      if (!btn) return;
+      const done = isDailyDone();
+      btn.classList.toggle("is-done", done);
+      const labelEl = btn.querySelector(".daily-btn-label");
+      if (labelEl) labelEl.textContent = done ? "Daily Done ✓" : "Daily Challenge";
+    }
+
+    // --- End Daily Challenge ---
+
     function wireEvents() {
       $("#play-button").addEventListener("click", () => startLevel(state.level));
       $("#new-game-button").addEventListener("click", () => {
@@ -2143,18 +2374,34 @@
         saveGame();
         startLevel(1);
       });
+      $("#daily-button").addEventListener("click", startDailyChallenge);
+      $("#daily-share-button").addEventListener("click", () => {
+        const text = getDailyShareText();
+        if (navigator.clipboard && navigator.clipboard.writeText) {
+          navigator.clipboard.writeText(text).then(() => showToast("Copied!")).catch(() => showToast("Copy failed"));
+        } else {
+          showToast("Copied!");
+        }
+      });
       $("#menu-settings-button").addEventListener("click", () => openModal("settings-modal"));
       $("#how-button").addEventListener("click", () => openModal("rules-modal"));
       $("#pause-button").addEventListener("click", () => {
         if (!state.solved) openModal("pause-modal");
       });
       $("#resume-button").addEventListener("click", () => closeModal("pause-modal"));
-      $("#restart-button").addEventListener("click", () => startLevel(state.level));
+      $("#restart-button").addEventListener("click", () => {
+        if (state.isDailyMode) {
+          startDailyChallenge();
+        } else {
+          startLevel(state.level);
+        }
+      });
       $("#pause-settings-button").addEventListener("click", () => openModal("settings-modal"));
       $("#quit-button").addEventListener("click", () => {
         clearTimer();
         closeAllModals();
         state.isPlaying = false;
+        state.isDailyMode = false;
         showScreen("menu");
       });
       $("#next-level-button").addEventListener("click", () => startLevel(state.level));
@@ -2212,6 +2459,7 @@
     wireEvents();
     renderMenu();
     renderToggles();
+    updateDailyButton();
   </script>
 </body>
 </html>

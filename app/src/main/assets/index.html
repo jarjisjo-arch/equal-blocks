@@ -1655,10 +1655,9 @@
       const [rMin, rMax] = WAVE_RANGES[wi];
       const numberRange  = Math.round(scale * (rMin + waveProgress * (rMax - rMin)));
 
-      // Timer: generous early, tightens with phase progression and wave position
-      const timeLimit = Math.max(20, Math.round(
-        70 - (phaseNum - 1) * 8 - (wi / 15) * 15 - waveProgress * 5
-      ));
+      // Timer: constant per phase — difficulty comes from puzzle content, not the clock
+      const PHASE_TIMES = [70, 62, 56, 50, 46];
+      const timeLimit = PHASE_TIMES[Math.min(phaseNum - 1, 4)];
 
       // Mechanic chances: scale with wave progress (gentle at start, fuller at end)
       const chScale      = 0.25 + waveProgress * 0.45;

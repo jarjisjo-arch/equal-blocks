@@ -1655,9 +1655,11 @@
       const [rMin, rMax] = WAVE_RANGES[wi];
       const numberRange  = Math.round(scale * (rMin + waveProgress * (rMax - rMin)));
 
-      // Timer: constant per phase — difficulty comes from puzzle content, not the clock
-      const PHASE_TIMES = [70, 62, 56, 50, 46];
-      const timeLimit = PHASE_TIMES[Math.min(phaseNum - 1, 4)];
+      // Timer: derived from cognitive load study + 10s player buffer
+      // step cost per tile per attempt based on active mechanics
+      const STEP_COSTS = [1.5, 2.1, 2.5, 3.1, 2.5, 3.1, 3.5, 4.1];
+      const stepCost = STEP_COSTS[pairIdx];
+      const timeLimit = Math.round((20 + blockCount * 0.3 + 3 * blockCount * stepCost + 10) / 5) * 5;
 
       // Mechanic chances: scale with wave progress (gentle at start, fuller at end)
       const chScale      = 0.25 + waveProgress * 0.45;

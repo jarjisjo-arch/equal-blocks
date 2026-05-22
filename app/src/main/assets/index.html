@@ -925,6 +925,125 @@
       animation: solved-pop 520ms ease;
     }
 
+    /* ── Mechanic Unlock Celebration ─────────────────────────── */
+    #unlock-modal {
+      z-index: 40;
+      background: rgba(6, 10, 14, 0.88);
+      backdrop-filter: blur(16px);
+    }
+
+    .unlock-panel {
+      position: relative;
+      width: 100%;
+      max-width: 360px;
+      background: var(--surface-container);
+      border-radius: 28px;
+      padding: 32px 24px 28px;
+      text-align: center;
+      overflow: hidden;
+      border: 1px solid rgba(255,255,255,0.07);
+      box-shadow: 0 24px 60px rgba(0,0,0,0.5);
+    }
+
+    .unlock-shine {
+      position: absolute;
+      inset: 0;
+      background: radial-gradient(ellipse at 50% 30%, var(--unlock-color, #89ceff) 0%, transparent 65%);
+      opacity: 0.10;
+      pointer-events: none;
+      animation: unlock-shine-pulse 2s ease-in-out infinite;
+    }
+
+    @keyframes unlock-shine-pulse {
+      0%, 100% { opacity: 0.08; transform: scale(1); }
+      50%       { opacity: 0.18; transform: scale(1.05); }
+    }
+
+    .unlock-badge {
+      position: relative;
+      width: 90px;
+      height: 90px;
+      margin: 0 auto 20px;
+      border-radius: 28px;
+      background: color-mix(in srgb, var(--unlock-color, #89ceff) 18%, transparent);
+      border: 2px solid color-mix(in srgb, var(--unlock-color, #89ceff) 45%, transparent);
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      font-size: 34px;
+      font-weight: 800;
+      color: var(--unlock-color, #89ceff);
+      animation: unlock-badge-pop 0.55s cubic-bezier(0.34,1.56,0.64,1) both;
+      box-shadow: 0 0 32px color-mix(in srgb, var(--unlock-color, #89ceff) 35%, transparent);
+    }
+
+    @keyframes unlock-badge-pop {
+      0%   { transform: scale(0) rotate(-15deg); opacity: 0; }
+      70%  { transform: scale(1.15) rotate(4deg); }
+      100% { transform: scale(1) rotate(0deg); opacity: 1; }
+    }
+
+    .unlock-label {
+      font-size: 11px;
+      font-weight: 800;
+      letter-spacing: 0.14em;
+      text-transform: uppercase;
+      color: var(--unlock-color, #89ceff);
+      margin-bottom: 6px;
+      opacity: 0;
+      animation: unlock-fade-up 0.4s 0.35s ease forwards;
+    }
+
+    .unlock-name {
+      font-size: 26px;
+      font-weight: 800;
+      color: var(--on-surface);
+      line-height: 1.2;
+      margin-bottom: 10px;
+      opacity: 0;
+      animation: unlock-fade-up 0.4s 0.45s ease forwards;
+    }
+
+    .unlock-desc {
+      font-size: 14px;
+      color: var(--on-surface-variant);
+      line-height: 1.6;
+      margin-bottom: 24px;
+      opacity: 0;
+      animation: unlock-fade-up 0.4s 0.55s ease forwards;
+    }
+
+    @keyframes unlock-fade-up {
+      from { opacity: 0; transform: translateY(12px); }
+      to   { opacity: 1; transform: translateY(0); }
+    }
+
+    .unlock-sparkle {
+      position: absolute;
+      border-radius: 50%;
+      pointer-events: none;
+      animation: sparkle-burst var(--dur) ease-out var(--delay) both;
+    }
+
+    @keyframes sparkle-burst {
+      0%   { transform: translate(0,0) scale(0); opacity: 1; }
+      60%  { opacity: 1; }
+      100% { transform: translate(var(--tx), var(--ty)) scale(0.3); opacity: 0; }
+    }
+
+    .unlock-star {
+      position: absolute;
+      font-size: var(--sz);
+      pointer-events: none;
+      animation: star-spin var(--dur) ease-out var(--delay) both;
+      color: var(--unlock-color, #89ceff);
+    }
+
+    @keyframes star-spin {
+      0%   { transform: translate(0,0) scale(0) rotate(0deg); opacity: 1; }
+      100% { transform: translate(var(--tx), var(--ty)) scale(1) rotate(var(--rot)); opacity: 0; }
+    }
+
     .confetti-layer {
       position: fixed;
       inset: 0;
@@ -1286,6 +1405,17 @@
           </span>
         </div>
       </div>
+    </div>
+  </div>
+
+  <div class="modal" id="unlock-modal" role="dialog" aria-modal="true" aria-labelledby="unlock-name">
+    <div class="unlock-panel" id="unlock-panel">
+      <div class="unlock-shine" id="unlock-shine"></div>
+      <div class="unlock-badge" id="unlock-badge"></div>
+      <div class="unlock-label">Unlocked!</div>
+      <div class="unlock-name" id="unlock-name"></div>
+      <div class="unlock-desc" id="unlock-desc"></div>
+      <button class="action-button" id="unlock-lets-go">Let's Go!</button>
     </div>
   </div>
 
@@ -2167,7 +2297,9 @@
 
       window.setTimeout(() => {
         els.board.classList.remove("solved-pop");
-        openModal("result-modal");
+        if (!checkMechanicUnlock(nextLevel)) {
+          openModal("result-modal");
+        }
       }, 620);
     }
 
@@ -2247,6 +2379,75 @@
       els.toast.classList.add("is-active");
       window.clearTimeout(showToast.timeout);
       showToast.timeout = window.setTimeout(() => els.toast.classList.remove("is-active"), 1100);
+    }
+
+    const MECHANIC_UNLOCKS = {
+      7:  { key: 'neg',  symbol: '−n', color: '#ffb2b7', name: 'Negative Numbers', desc: 'Tiles can now be negative — they subtract from the total. Watch your sums!' },
+      13: { key: 'sq',   symbol: 'x²', color: '#ffdc2f', name: 'Squares',           desc: 'Tiles can now appear as perfect squares. Spot them and use them wisely!' },
+      33: { key: 'root', symbol: '√x', color: '#98d85f', name: 'Square Roots',      desc: 'Tiles can now show square roots. Find the hidden value inside!' },
+      89: { key: 'p2',   symbol: '⬆',  color: '#89ceff', name: 'Phase 2',           desc: 'Bigger numbers, more tiles — you\'ve mastered the basics. Now it gets real!' },
+    };
+
+    function checkMechanicUnlock(nextLevel) {
+      const unlock = MECHANIC_UNLOCKS[nextLevel];
+      if (!unlock) return false;
+      if (localStorage.getItem(`eb_unlocked_${unlock.key}`)) return false;
+      localStorage.setItem(`eb_unlocked_${unlock.key}`, '1');
+      showUnlockModal(unlock);
+      return true;
+    }
+
+    function showUnlockModal(unlock) {
+      const panel  = document.getElementById('unlock-panel');
+      const badge  = document.getElementById('unlock-badge');
+      const name   = document.getElementById('unlock-name');
+      const desc   = document.getElementById('unlock-desc');
+      const shine  = document.getElementById('unlock-shine');
+
+      panel.style.setProperty('--unlock-color', unlock.color);
+      shine.style.setProperty('--unlock-color', unlock.color);
+      badge.style.setProperty('--unlock-color', unlock.color);
+      badge.textContent = unlock.symbol;
+      name.textContent  = unlock.name;
+      desc.textContent  = unlock.desc;
+
+      // reset animations
+      badge.style.animation = 'none';
+      void badge.offsetWidth;
+      badge.style.animation = '';
+
+      // clear old sparkles
+      panel.querySelectorAll('.unlock-sparkle, .unlock-star').forEach(el => el.remove());
+
+      // burst sparkles from badge center
+      const cx = panel.offsetWidth / 2;
+      const cy = 90;
+      const sparkleColors = [unlock.color, '#fff', '#ffdc2f', '#c8f'];
+      for (let i = 0; i < 22; i++) {
+        const el = document.createElement('span');
+        const isStar = i % 4 === 0;
+        el.className = isStar ? 'unlock-star' : 'unlock-sparkle';
+        const angle = (i / 22) * 360 + Math.random() * 16;
+        const dist  = 60 + Math.random() * 110;
+        const tx = Math.round(Math.cos(angle * Math.PI / 180) * dist);
+        const ty = Math.round(Math.sin(angle * Math.PI / 180) * dist);
+        el.style.cssText = `
+          left:${cx}px; top:${cy}px;
+          --tx:${tx}px; --ty:${ty}px;
+          --dur:${0.6 + Math.random() * 0.7}s;
+          --delay:${Math.random() * 0.25}s;
+          --rot:${Math.round(Math.random() * 360)}deg;
+          --sz:${10 + Math.round(Math.random() * 10)}px;
+          width:${4 + Math.round(Math.random() * 6)}px;
+          height:${4 + Math.round(Math.random() * 6)}px;
+          background:${sparkleColors[i % sparkleColors.length]};
+          color:${sparkleColors[i % sparkleColors.length]};
+        `;
+        el.textContent = isStar ? '★' : '';
+        panel.appendChild(el);
+      }
+
+      openModal('unlock-modal');
     }
 
     function burstConfetti() {
@@ -2506,6 +2707,10 @@
         localStorage.setItem("eb_tutorial_seen", "1");
         closeModal("tutorial-modal");
         startLevel(state.level);
+      });
+      $("#unlock-lets-go").addEventListener("click", () => {
+        closeModal("unlock-modal");
+        openModal("result-modal");
       });
       $("#new-game-button").addEventListener("click", () => {
         state.level = 1;

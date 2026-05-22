@@ -714,6 +714,73 @@
       gap: 10px;
     }
 
+    .tutorial-demo {
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      gap: 12px;
+      margin: 8px 0;
+    }
+
+    .tutorial-zone {
+      width: 100%;
+      height: 52px;
+      border: 2px dashed rgba(137, 206, 255, 0.3);
+      border-radius: 14px;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+    }
+
+    .tutorial-zone-label {
+      font-size: 13px;
+      color: var(--on-surface-variant);
+      font-weight: 600;
+      letter-spacing: 0.04em;
+    }
+
+    .tutorial-mid {
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      gap: 8px;
+    }
+
+    .tutorial-tile-sample {
+      width: 64px;
+      height: 64px;
+      background: var(--primary);
+      border-radius: 16px;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      font-size: 28px;
+      font-weight: 700;
+      color: #fff;
+      box-shadow: 0 4px 12px rgba(0,0,0,0.3);
+    }
+
+    .tutorial-hint {
+      display: flex;
+      align-items: center;
+      gap: 6px;
+      font-size: 14px;
+      font-weight: 600;
+      color: var(--on-surface-variant);
+    }
+
+    .tutorial-arrow {
+      font-size: 20px;
+      color: var(--primary-fixed-dim);
+    }
+
+    .tutorial-goal {
+      text-align: center;
+      font-size: 14px;
+      color: var(--on-surface-variant);
+      margin: 4px 0 8px;
+    }
+
     .setting-row {
       background: var(--surface-container-low);
       border: 1px solid rgba(62, 72, 80, 0.22);
@@ -1219,6 +1286,37 @@
           </span>
         </div>
       </div>
+    </div>
+  </div>
+
+  <div class="modal" id="tutorial-modal" role="dialog" aria-modal="true" aria-labelledby="tutorial-title">
+    <div class="modal-panel recessed-tray">
+      <div class="modal-head">
+        <h2 class="modal-title" id="tutorial-title">How to Play</h2>
+      </div>
+      <div class="modal-body">
+        <div class="tutorial-demo">
+          <div class="tutorial-zone">
+            <span class="tutorial-zone-label">Top row</span>
+          </div>
+          <div class="tutorial-mid">
+            <div class="tutorial-hint tutorial-hint-up">
+              <span class="tutorial-arrow">↑</span>
+              <span>Swipe up</span>
+            </div>
+            <div class="tutorial-tile-sample">7</div>
+            <div class="tutorial-hint tutorial-hint-down">
+              <span class="tutorial-arrow">↓</span>
+              <span>Swipe down</span>
+            </div>
+          </div>
+          <div class="tutorial-zone">
+            <span class="tutorial-zone-label">Bottom row</span>
+          </div>
+        </div>
+        <p class="tutorial-goal">Make both rows add up to the same total</p>
+      </div>
+      <button class="action-button" id="tutorial-got-it">Got it!</button>
     </div>
   </div>
 
@@ -2397,7 +2495,18 @@
     // --- End Daily Challenge ---
 
     function wireEvents() {
-      $("#play-button").addEventListener("click", () => startLevel(state.level));
+      $("#play-button").addEventListener("click", () => {
+        if (!localStorage.getItem("eb_tutorial_seen")) {
+          openModal("tutorial-modal");
+        } else {
+          startLevel(state.level);
+        }
+      });
+      $("#tutorial-got-it").addEventListener("click", () => {
+        localStorage.setItem("eb_tutorial_seen", "1");
+        closeModal("tutorial-modal");
+        startLevel(state.level);
+      });
       $("#new-game-button").addEventListener("click", () => {
         state.level = 1;
         state.bonusTime = 0;

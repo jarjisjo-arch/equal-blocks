@@ -1616,10 +1616,11 @@
 
       // Tile count: odd waves use base tiles, even waves switch to higher tiles
       // at 60% wave progress (sawtooth: numbers reset when tiles increase)
-      const isEvenWave = waveNum % 2 === 0;
-      const baseTiles  = phaseNum === 1 ? 4 : 6;
-      const highTiles  = phaseNum === 1 ? 6 : 8;
-      const blockCount = (isEvenWave && waveProgress >= 0.6) ? highTiles : baseTiles;
+      const isEvenWave    = waveNum % 2 === 0;
+      const baseTiles     = phaseNum === 1 ? 4 : 6;
+      const highTiles     = phaseNum === 1 ? 6 : 8;
+      const highTileCount = Math.round(levelsInWave * 0.4);
+      const blockCount    = (isEvenWave && posInWave >= levelsInWave - highTileCount) ? highTiles : baseTiles;
 
       // Number range: sawtooth within each wave, slowly rising baseline across waves
       // Phase 1 scale = 1×; Phase 2 = 2.2×; Phase 3 = 3.2×; Phase 4 = 4.5×; Endless = 6×

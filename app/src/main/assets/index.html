@@ -781,6 +781,47 @@
       margin: 4px 0 8px;
     }
 
+    .stats-grid {
+      display: grid;
+      grid-template-columns: 1fr 1fr;
+      gap: 10px;
+    }
+
+    .stat-card {
+      background: var(--surface-container-low);
+      border: 1px solid rgba(62, 72, 80, 0.28);
+      border-radius: 16px;
+      padding: 16px 12px 14px;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      gap: 4px;
+    }
+
+    .stat-card-wide {
+      grid-column: 1 / -1;
+    }
+
+    .stat-card-icon {
+      font-size: 22px;
+      line-height: 1;
+    }
+
+    .stat-card-value {
+      font-size: 28px;
+      font-weight: 800;
+      color: var(--on-surface);
+      line-height: 1.1;
+    }
+
+    .stat-card-label {
+      font-size: 11px;
+      font-weight: 600;
+      letter-spacing: 0.06em;
+      text-transform: uppercase;
+      color: var(--on-surface-variant);
+    }
+
     .setting-row {
       background: var(--surface-container-low);
       border: 1px solid rgba(62, 72, 80, 0.22);
@@ -1195,6 +1236,10 @@
             <span class="material-symbols-outlined" aria-hidden="true">refresh</span>
             New Game
           </button>
+          <button class="action-button secondary" id="stats-button">
+            <span class="material-symbols-outlined" aria-hidden="true">emoji_events</span>
+            My Bests
+          </button>
           <button class="action-button secondary" id="how-button">
             <span class="material-symbols-outlined" aria-hidden="true">psychology</span>
             Rules
@@ -1408,6 +1453,44 @@
     </div>
   </div>
 
+  <div class="modal" id="stats-modal" role="dialog" aria-modal="true" aria-labelledby="stats-title">
+    <div class="modal-panel recessed-tray">
+      <div class="modal-head">
+        <h2 class="modal-title" id="stats-title">My Bests</h2>
+        <button class="icon-button" data-close-modal="stats-modal" aria-label="Close stats">
+          <span class="material-symbols-outlined" aria-hidden="true">close</span>
+        </button>
+      </div>
+      <div class="modal-body stats-grid">
+        <div class="stat-card">
+          <span class="stat-card-icon" style="color:#89ceff">🏆</span>
+          <span class="stat-card-value" id="sb-best-level">—</span>
+          <span class="stat-card-label">Highest Level</span>
+        </div>
+        <div class="stat-card">
+          <span class="stat-card-icon" style="color:#98d85f">✓</span>
+          <span class="stat-card-value" id="sb-total-solved">—</span>
+          <span class="stat-card-label">Puzzles Solved</span>
+        </div>
+        <div class="stat-card">
+          <span class="stat-card-icon" style="color:#ffdc2f">⚡</span>
+          <span class="stat-card-value" id="sb-best-time">—</span>
+          <span class="stat-card-label">Fastest Solve</span>
+        </div>
+        <div class="stat-card">
+          <span class="stat-card-icon" style="color:#ffb2b7">🔥</span>
+          <span class="stat-card-value" id="sb-best-streak">—</span>
+          <span class="stat-card-label">Best Streak</span>
+        </div>
+        <div class="stat-card stat-card-wide">
+          <span class="stat-card-icon" style="color:#c8aaff">◈</span>
+          <span class="stat-card-value" id="sb-best-daily">—</span>
+          <span class="stat-card-label">Best Daily Time</span>
+        </div>
+      </div>
+    </div>
+  </div>
+
   <div class="modal" id="unlock-modal" role="dialog" aria-modal="true" aria-labelledby="unlock-name">
     <div class="unlock-panel" id="unlock-panel">
       <div class="unlock-shine" id="unlock-shine"></div>
@@ -1561,7 +1644,14 @@
         streak: 0
       },
       isDailyMode: false,
-      dailyStartTime: null
+      dailyStartTime: null,
+      levelStartTime: null,
+      stats: {
+        totalSolved: 0,
+        bestSolveTime: null,
+        bestDailyTime: null,
+        bestStreak: 0,
+      }
     };
 
     const $ = (selector) => document.querySelector(selector);
@@ -1635,6 +1725,11 @@
         state.daily.won = typeof d.won === "boolean" ? d.won : null;
         state.daily.timeTaken = Number.isFinite(d.timeTaken) ? d.timeTaken : null;
         state.daily.streak = Number.isFinite(d.streak) ? Math.max(0, d.streak) : 0;
+        const st = saved.stats || {};
+        state.stats.totalSolved   = Number.isFinite(st.totalSolved)  ? st.totalSolved  : 0;
+        state.stats.bestSolveTime = Number.isFinite(st.bestSolveTime) ? st.bestSolveTime : null;
+        state.stats.bestDailyTime = Number.isFinite(st.bestDailyTime) ? st.bestDailyTime : null;
+        state.stats.bestStreak    = Number.isFinite(st.bestStreak)    ? st.bestStreak    : 0;
         syncLifeRecharge();
         if (state.gameLives <= 0) startLifeRecharge();
       } catch {
@@ -1652,7 +1747,8 @@
         gameLives: state.gameLives,
         livesReadyAt: state.livesReadyAt,
         settings: state.settings,
-        daily: state.daily
+        daily: state.daily,
+        stats: state.stats
       }));
     }
 
@@ -2085,6 +2181,7 @@
       state.lastAttemptSignature = "";
       state.isDailyMode = false;
 
+      state.levelStartTime = Date.now();
       saveGame();
       showScreen("game");
       renderGame();
@@ -2291,6 +2388,14 @@
       state.bestLevel = Math.max(state.bestLevel, nextLevel);
       state.level = nextLevel;
       state.bonusTime = 15;
+      state.stats.totalSolved++;
+      if (state.levelStartTime) {
+        const solveSecs = Math.round((Date.now() - state.levelStartTime) / 1000);
+        if (state.stats.bestSolveTime === null || solveSecs < state.stats.bestSolveTime) {
+          state.stats.bestSolveTime = solveSecs;
+        }
+      }
+      state.stats.bestStreak = Math.max(state.stats.bestStreak, state.daily.streak);
       saveGame();
       els.resultTitle.textContent = "Balanced";
       els.nextLevelStat.textContent = `Lv. ${nextLevel}`;
@@ -2633,10 +2738,16 @@
 
       if (won) {
         state.daily.streak = state.daily.date === yStr ? state.daily.streak + 1 : 1;
+        if (timeTaken !== null) {
+          if (state.stats.bestDailyTime === null || timeTaken < state.stats.bestDailyTime) {
+            state.stats.bestDailyTime = timeTaken;
+          }
+        }
       } else if (state.daily.date !== today) {
         state.daily.streak = 0;
       }
 
+      state.stats.bestStreak = Math.max(state.stats.bestStreak, state.daily.streak);
       state.daily.date = today;
       state.daily.won = won;
       state.daily.timeTaken = timeTaken;
@@ -2695,6 +2806,16 @@
 
     // --- End Daily Challenge ---
 
+    function renderStatsModal() {
+      const fmt = (s) => s !== null ? `${s}s` : '—';
+      document.getElementById('sb-best-level').textContent  = `Lv. ${state.bestLevel}`;
+      document.getElementById('sb-total-solved').textContent = state.stats.totalSolved || '0';
+      document.getElementById('sb-best-time').textContent   = fmt(state.stats.bestSolveTime);
+      document.getElementById('sb-best-streak').textContent = state.stats.bestStreak
+        ? `${state.stats.bestStreak} 🔥` : '—';
+      document.getElementById('sb-best-daily').textContent  = fmt(state.stats.bestDailyTime);
+    }
+
     function wireEvents() {
       $("#play-button").addEventListener("click", () => {
         if (!localStorage.getItem("eb_tutorial_seen")) {
@@ -2729,6 +2850,7 @@
       });
       $("#menu-settings-button").addEventListener("click", () => openModal("settings-modal"));
       $("#how-button").addEventListener("click", () => openModal("rules-modal"));
+      $("#stats-button").addEventListener("click", () => { renderStatsModal(); openModal("stats-modal"); });
       $("#pause-button").addEventListener("click", () => {
         if (!state.solved) openModal("pause-modal");
       });

@@ -1348,18 +1348,12 @@
       font-size: 10px;
       font-weight: 800;
       color: rgba(255,255,255,0.95);
-      background: rgba(0,0,0,0.6);
+      background: rgba(0,0,0,0.62);
       border-radius: 4px;
       padding: 1px 4px;
       line-height: 1.4;
       pointer-events: none;
       z-index: 2;
-      animation: peek-fade 3s ease forwards;
-    }
-
-    @keyframes peek-fade {
-      0%, 70% { opacity: 1; }
-      100%     { opacity: 0; }
     }
 
     .game-coin-badge {
@@ -1846,8 +1840,9 @@
       bonusTime: 0,
       coins: 0,
       sumDisplayActive: false,
+      peekActive: false,
+      revealedTiles: [],
       levelTimeLimit: 45,
-      longPressTimer: null,
       currentTiles: [],
       upper: [],
       lower: [],
@@ -2414,6 +2409,8 @@
       state.lastAttemptSignature = "";
       state.isDailyMode = false;
       state.sumDisplayActive = false;
+      state.peekActive = false;
+      state.revealedTiles = [];
       document.querySelectorAll('.zone-sum-badge').forEach(el => el.remove());
       const revealEl = document.getElementById('solution-reveal');
       if (revealEl) revealEl.style.display = 'none';
@@ -2495,7 +2492,11 @@
       label.textContent = tile.label;
       div.appendChild(label);
 
-      if (zone === "tray") {
+      if (state.revealedTiles.includes(tile.id)) {
+        const overlay = document.createElement('div');
+        overlay.className = 'tile-value-overlay';
+        overlay.textContent = tile.value;
+        div.appendChild(overlay);
       }
 
       div.addEventListener("pointerdown", onTilePointerDown);
@@ -2532,6 +2533,17 @@
       const dy = event.clientY - state.drag.startY;
       const dx = event.clientX - state.drag.startX;
       const moved = Math.abs(dy) > 18 || Math.abs(dx) > 18;
+
+      // Peek mode: tap (no drag) permanently reveals this tile's value
+      if (state.peekActive && !moved) {
+        state.drag = null;
+        state.peekActive = false;
+        const id = tile.dataset.tileId;
+        if (!state.revealedTiles.includes(id)) state.revealedTiles.push(id);
+        renderGame();
+        renderHelperBar();
+        return;
+      }
       let targetZone = null;
 
       if (state.drag.zone === "tray") {
@@ -3211,7 +3223,10 @@
       if (!sumBtn || !skipBtn) return;
       sumBtn.classList.toggle('is-active',    state.sumDisplayActive);
       sumBtn.classList.toggle('cant-afford',  !state.sumDisplayActive && state.coins < 300);
-      if (peekBtn) peekBtn.classList.toggle('cant-afford', state.coins < 200);
+      if (peekBtn) {
+        peekBtn.classList.toggle('is-active',   state.peekActive);
+        peekBtn.classList.toggle('cant-afford', !state.peekActive && state.coins < 200);
+      }
       skipBtn.classList.toggle('cant-afford', state.coins < 1500);
     }
 
@@ -3257,20 +3272,15 @@
     }
 
     function activatePeek() {
+      if (state.peekActive) {
+        state.peekActive = false;
+        renderHelperBar();
+        return;
+      }
       if (!spendCoins(200)) { showToast('Need 200 🪙'); return; }
-      document.querySelectorAll('.tile-value-overlay').forEach(el => el.remove());
-      document.querySelectorAll('.tile').forEach(el => {
-        const tile = getTile(el.dataset.tileId);
-        if (!tile) return;
-        const overlay = document.createElement('div');
-        overlay.className = 'tile-value-overlay';
-        overlay.textContent = tile.value;
-        el.appendChild(overlay);
-      });
-      playCoinSound();
-      window.setTimeout(() => {
-        document.querySelectorAll('.tile-value-overlay').forEach(el => el.remove());
-      }, 3000);
+      state.peekActive = true;
+      showToast('Tap a tile to reveal its value');
+      renderHelperBar();
     }
 
     function findSolution(tiles) {

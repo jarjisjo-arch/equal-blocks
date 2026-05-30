@@ -1341,19 +1341,25 @@
       color: var(--on-surface);
     }
 
-    .tile-tooltip {
-      position: fixed;
-      z-index: 55;
-      background: rgba(16,20,24,0.97);
-      border: 1px solid rgba(255,215,0,0.5);
-      border-radius: 8px;
-      padding: 5px 12px;
-      font-size: 15px;
+    .tile-value-overlay {
+      position: absolute;
+      bottom: 4px;
+      right: 5px;
+      font-size: 10px;
       font-weight: 800;
-      color: #ffd700;
+      color: rgba(255,255,255,0.95);
+      background: rgba(0,0,0,0.6);
+      border-radius: 4px;
+      padding: 1px 4px;
+      line-height: 1.4;
       pointer-events: none;
-      white-space: nowrap;
-      box-shadow: 0 4px 16px rgba(0,0,0,0.6);
+      z-index: 2;
+      animation: peek-fade 3s ease forwards;
+    }
+
+    @keyframes peek-fade {
+      0%, 70% { opacity: 1; }
+      100%     { opacity: 0; }
     }
 
     .game-coin-badge {
@@ -1500,6 +1506,10 @@
           <button class="helper-btn" id="helper-sum-btn">
             <span class="helper-btn-label">Σ Sum</span>
             <span class="helper-btn-cost">300 🪙</span>
+          </button>
+          <button class="helper-btn" id="helper-peek-btn">
+            <span class="helper-btn-label">👁 Peek</span>
+            <span class="helper-btn-cost">200 🪙</span>
           </button>
           <button class="helper-btn" id="helper-skip-btn">
             <span class="helper-btn-label">⏭ Skip</span>
@@ -2505,29 +2515,16 @@
       const tile = event.currentTarget;
       tile.setPointerCapture?.(event.pointerId);
       tile.classList.add("is-dragging");
-      const startX = event.clientX;
-      const startY = event.clientY;
       state.drag = {
         id: tile.dataset.tileId,
         zone: tile.dataset.zone,
-        startX,
-        startY,
+        startX: event.clientX,
+        startY: event.clientY,
         startedAt: Date.now()
       };
-      state.longPressTimer = window.setTimeout(() => {
-        if (!state.drag || state.drag.id !== tile.dataset.tileId) return;
-        const moved = Math.abs(state.drag.startX - startX) > 10
-                   || Math.abs(state.drag.startY - startY) > 10;
-        if (!moved) {
-          tile.classList.remove('is-dragging');
-          state.drag = null;
-          showTileTooltip(tile.dataset.tileId, tile);
-        }
-      }, 500);
     }
 
     function onTilePointerUp(event) {
-      if (state.longPressTimer) { window.clearTimeout(state.longPressTimer); state.longPressTimer = null; }
       const tile = event.currentTarget;
       tile.classList.remove("is-dragging");
       if (!state.drag || state.drag.id !== tile.dataset.tileId) return;
@@ -2555,7 +2552,6 @@
     }
 
     function onTilePointerCancel(event) {
-      if (state.longPressTimer) { window.clearTimeout(state.longPressTimer); state.longPressTimer = null; }
       event.currentTarget.classList.remove("is-dragging");
       state.drag = null;
     }
@@ -3210,10 +3206,12 @@
 
     function renderHelperBar() {
       const sumBtn  = document.getElementById('helper-sum-btn');
+      const peekBtn = document.getElementById('helper-peek-btn');
       const skipBtn = document.getElementById('helper-skip-btn');
       if (!sumBtn || !skipBtn) return;
       sumBtn.classList.toggle('is-active',    state.sumDisplayActive);
       sumBtn.classList.toggle('cant-afford',  !state.sumDisplayActive && state.coins < 300);
+      if (peekBtn) peekBtn.classList.toggle('cant-afford', state.coins < 200);
       skipBtn.classList.toggle('cant-afford', state.coins < 1500);
     }
 
@@ -3258,21 +3256,21 @@
       startLevel(next);
     }
 
-    function showTileTooltip(tileId, el) {
+    function activatePeek() {
       if (!spendCoins(200)) { showToast('Need 200 🪙'); return; }
-      const tile = getTile(tileId);
-      if (!tile) return;
-      document.querySelectorAll('.tile-tooltip').forEach(t => t.remove());
-      const tip = document.createElement('div');
-      tip.className = 'tile-tooltip';
-      tip.textContent = `= ${tile.value}`;
-      const r = el.getBoundingClientRect();
-      tip.style.left = (r.left + r.width / 2) + 'px';
-      tip.style.top  = (r.top - 8) + 'px';
-      document.body.appendChild(tip);
-      window.setTimeout(() => tip.remove(), 2000);
+      document.querySelectorAll('.tile-value-overlay').forEach(el => el.remove());
+      document.querySelectorAll('.tile').forEach(el => {
+        const tile = getTile(el.dataset.tileId);
+        if (!tile) return;
+        const overlay = document.createElement('div');
+        overlay.className = 'tile-value-overlay';
+        overlay.textContent = tile.value;
+        el.appendChild(overlay);
+      });
       playCoinSound();
-      updateCoinDisplay();
+      window.setTimeout(() => {
+        document.querySelectorAll('.tile-value-overlay').forEach(el => el.remove());
+      }, 3000);
     }
 
     function findSolution(tiles) {
@@ -3385,6 +3383,7 @@
       $("#how-button").addEventListener("click", () => openModal("rules-modal"));
       document.getElementById("earn-coins-button").addEventListener("click", startCoinAd);
       document.getElementById("helper-sum-btn").addEventListener("click", activateSumDisplay);
+      document.getElementById("helper-peek-btn").addEventListener("click", activatePeek);
       document.getElementById("helper-skip-btn").addEventListener("click", doSkipLevel);
       $("#stats-button").addEventListener("click", () => { renderStatsModal(); openModal("stats-modal"); });
       $("#pause-button").addEventListener("click", () => {

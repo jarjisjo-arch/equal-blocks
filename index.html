@@ -3080,26 +3080,35 @@
       try {
         const AudioContext = window.AudioContext || window.webkitAudioContext;
         const ctx = new AudioContext();
-        // Rapid coin clinks — like coins dropping into a pile
-        const clinks = [
-          [1320, 0.000], [1050, 0.055], [1480, 0.105],
-          [980,  0.150], [1220, 0.190], [1380, 0.225],
-          [1060, 0.255], [1500, 0.280],
-        ];
-        clinks.forEach(([freq, delay]) => {
-          const osc = ctx.createOscillator();
-          const g   = ctx.createGain();
-          osc.type = 'sine';
-          osc.frequency.setValueAtTime(freq, ctx.currentTime + delay);
-          osc.frequency.exponentialRampToValueAtTime(freq * 0.52, ctx.currentTime + delay + 0.09);
-          const t = ctx.currentTime + delay;
-          g.gain.setValueAtTime(0.001, t);
-          g.gain.linearRampToValueAtTime(0.09, t + 0.007);
-          g.gain.exponentialRampToValueAtTime(0.001, t + 0.10);
-          osc.connect(g);
-          g.connect(ctx.destination);
-          osc.start(t);
-          osc.stop(t + 0.12);
+
+        // Accelerating clinks — coins hitting a pile (gets faster, then quieter as pile dampens)
+        const times = [0, 0.09, 0.17, 0.24, 0.30, 0.35, 0.39, 0.42, 0.44];
+        const bases = [2100, 1850, 2450, 1700, 2250, 1950, 2380, 2060, 1800];
+
+        times.forEach((delay, i) => {
+          const freq = bases[i];
+          const vol  = 0.072 * Math.pow(0.86, i); // quieter as pile grows
+          const t    = ctx.currentTime + delay;
+
+          // Fundamental
+          const o1 = ctx.createOscillator(), g1 = ctx.createGain();
+          o1.type = 'sine';
+          o1.frequency.value = freq;
+          g1.gain.setValueAtTime(0, t);
+          g1.gain.linearRampToValueAtTime(vol, t + 0.003);
+          g1.gain.exponentialRampToValueAtTime(0.001, t + 0.13);
+          o1.connect(g1); g1.connect(ctx.destination);
+          o1.start(t); o1.stop(t + 0.15);
+
+          // Metallic overtone (~2.7× fundamental)
+          const o2 = ctx.createOscillator(), g2 = ctx.createGain();
+          o2.type = 'sine';
+          o2.frequency.value = freq * 2.73;
+          g2.gain.setValueAtTime(0, t);
+          g2.gain.linearRampToValueAtTime(vol * 0.38, t + 0.002);
+          g2.gain.exponentialRampToValueAtTime(0.001, t + 0.06);
+          o2.connect(g2); g2.connect(ctx.destination);
+          o2.start(t); o2.stop(t + 0.08);
         });
       } catch {}
     }

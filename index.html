@@ -1,0 +1,3383 @@
+<!DOCTYPE html>
+<html class="dark" lang="en">
+<head>
+  <meta charset="utf-8" />
+  <meta content="width=device-width, initial-scale=1.0" name="viewport" />
+  <title>Equal Blocks</title>
+  <link href="https://fonts.googleapis.com/css2?family=Quicksand:wght@500;700&display=swap" rel="stylesheet" />
+  <style>
+    :root {
+      --tertiary-fixed: #ffdcbd;
+      --inverse-primary: #006591;
+      --tertiary: #ffb86e;
+      --on-secondary-fixed-variant: #92002a;
+      --on-tertiary-fixed: #2c1600;
+      --tertiary-fixed-dim: #ffb86e;
+      --on-tertiary: #492900;
+      --on-error-container: #ffdad6;
+      --on-error: #690005;
+      --on-secondary: #67001b;
+      --error-container: #93000a;
+      --secondary-container: #b50036;
+      --surface-container-highest: #30353a;
+      --on-primary-container: #003751;
+      --surface: #0f1418;
+      --surface-container: #1b2024;
+      --surface-tint: #89ceff;
+      --primary-container: #0ea5e9;
+      --surface-variant: #30353a;
+      --tertiary-container: #de8712;
+      --outline: #88929b;
+      --on-primary: #00344d;
+      --outline-variant: #3e4850;
+      --surface-container-high: #252b2f;
+      --surface-dim: #0f1418;
+      --inverse-surface: #dee3e9;
+      --surface-bright: #353a3e;
+      --on-tertiary-container: #4d2b00;
+      --on-surface: #dee3e9;
+      --secondary: #ffb2b7;
+      --inverse-on-surface: #2c3135;
+      --surface-container-lowest: #0a0f13;
+      --primary-fixed: #c9e6ff;
+      --on-primary-fixed: #001e2f;
+      --on-primary-fixed-variant: #004c6e;
+      --on-background: #dee3e9;
+      --surface-container-low: #171c20;
+      --primary: #89ceff;
+      --on-surface-variant: #bec8d2;
+      --secondary-fixed: #ffdadb;
+      --error: #ffb4ab;
+      --primary-fixed-dim: #89ceff;
+      --on-secondary-container: #ffc2c4;
+      --background: #0f1418;
+      --tile-gap: 8px;
+      --container-margin: 24px;
+      --stack-sm: 4px;
+      --grid-padding: 16px;
+      --stack-md: 12px;
+    }
+
+    * {
+      box-sizing: border-box;
+      -webkit-tap-highlight-color: transparent;
+      user-select: none;
+    }
+
+    body {
+      min-height: max(884px, 100dvh);
+      margin: 0;
+      background: var(--background);
+      color: var(--on-background);
+      font-family: "Quicksand", system-ui, sans-serif;
+      overflow-x: hidden;
+    }
+
+    button, input {
+      font: inherit;
+    }
+
+    .material-symbols-outlined {
+      font-family: "Quicksand", system-ui, sans-serif;
+      font-weight: 700;
+      font-style: normal;
+      font-size: 24px;
+      line-height: 1;
+      letter-spacing: 0;
+      text-transform: none;
+      display: inline-flex;
+      align-items: center;
+      justify-content: center;
+      width: 1em;
+      min-width: 1em;
+      white-space: nowrap;
+      word-wrap: normal;
+      direction: ltr;
+      -webkit-font-smoothing: antialiased;
+    }
+
+    .app {
+      min-height: 100dvh;
+      display: flex;
+      flex-direction: column;
+      background:
+        radial-gradient(circle at 50% -20%, rgba(137, 206, 255, 0.14), transparent 34%),
+        var(--background);
+    }
+
+    .screen {
+      display: none;
+      min-height: 100dvh;
+      flex: 1;
+      flex-direction: column;
+      width: 100%;
+    }
+
+    .screen.is-active {
+      display: flex;
+    }
+
+    .top-app-bar {
+      background: rgba(15, 20, 24, 0.8);
+      backdrop-filter: blur(12px);
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      padding: 0 var(--container-margin);
+      height: 80px;
+      width: 100%;
+      border-bottom: 1px solid rgba(62, 72, 80, 0.1);
+      box-shadow: 0 1px 8px rgba(0, 0, 0, 0.12);
+      position: sticky;
+      top: 0;
+      z-index: 10;
+    }
+
+    .brand {
+      display: flex;
+      align-items: center;
+      gap: var(--stack-md);
+      min-width: 0;
+    }
+
+    .brand .material-symbols-outlined,
+    .brand-title {
+      color: var(--primary-fixed-dim);
+    }
+
+    .brand-title {
+      margin: 0;
+      font-size: 24px;
+      line-height: 32px;
+      font-weight: 700;
+      letter-spacing: 0;
+      white-space: nowrap;
+    }
+
+    .level-pill {
+      display: flex;
+      align-items: center;
+      gap: 10px;
+      white-space: nowrap;
+      color: var(--on-surface-variant);
+      font-size: 14px;
+      line-height: 20px;
+      font-weight: 700;
+      letter-spacing: 0.05em;
+      text-transform: none;
+    }
+
+    .life-bank {
+      display: inline-flex;
+      align-items: center;
+      gap: 4px;
+      color: var(--secondary);
+      background: rgba(255, 178, 183, 0.08);
+      border: 1px solid rgba(255, 178, 183, 0.16);
+      border-radius: 999px;
+      padding: 4px 8px;
+      font-size: 14px;
+      line-height: 20px;
+      font-weight: 700;
+      letter-spacing: 0;
+    }
+
+    .life-bank .material-symbols-outlined {
+      font-size: 18px;
+      font-variation-settings: "FILL" 1;
+    }
+
+    .life-bank.is-empty {
+      color: var(--on-surface-variant);
+      background: rgba(190, 200, 210, 0.06);
+      border-color: rgba(190, 200, 210, 0.12);
+    }
+
+    .icon-button {
+      border: 0;
+      width: 40px;
+      height: 40px;
+      border-radius: 12px;
+      display: inline-flex;
+      align-items: center;
+      justify-content: center;
+      background: transparent;
+      color: var(--on-surface-variant);
+      cursor: pointer;
+      transition: background 160ms ease, transform 160ms ease, color 160ms ease;
+    }
+
+    .icon-button:hover {
+      background: rgba(137, 206, 255, 0.08);
+      color: var(--primary);
+    }
+
+    .icon-button:active {
+      transform: translateY(1px);
+    }
+
+    .game-main {
+      flex: 1;
+      display: flex;
+      flex-direction: column;
+      padding: var(--stack-md) var(--container-margin);
+      gap: var(--stack-md);
+      width: 100%;
+      max-width: 448px;
+      margin: 0 auto;
+    }
+
+    .inner-glow {
+      box-shadow: inset 0 2px 4px rgba(255, 255, 255, 0.2);
+    }
+
+    .tactile-shadow {
+      box-shadow: 0 4px 0 rgba(0, 0, 0, 0.3), 0 8px 16px rgba(0, 0, 0, 0.2);
+    }
+
+    .tile-shadow {
+      box-shadow: 0 4px 0 rgba(0, 0, 0, 0.4), 0 8px 12px rgba(0, 0, 0, 0.3), inset 0 2px 4px rgba(255, 255, 255, 0.2);
+    }
+
+    .recessed-tray {
+      box-shadow: inset 0 4px 8px rgba(0, 0, 0, 0.5), inset 0 -2px 4px rgba(255, 255, 255, 0.05);
+    }
+
+    .status-bar {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      background: var(--surface-container-high);
+      border-radius: 12px;
+      padding: var(--grid-padding);
+      border: 1px solid rgba(62, 72, 80, 0.2);
+      box-shadow: 0 1px 2px rgba(0, 0, 0, 0.18);
+    }
+
+    .hearts {
+      display: flex;
+      gap: var(--stack-sm);
+      color: var(--secondary);
+    }
+
+    .hearts .empty {
+      color: rgba(190, 200, 210, 0.38);
+      font-variation-settings: "FILL" 0;
+    }
+
+    .timer {
+      font-size: 32px;
+      line-height: 1;
+      color: var(--on-surface);
+      font-family: ui-monospace, SFMono-Regular, Menlo, Consolas, "Liberation Mono", monospace;
+      font-weight: 700;
+      letter-spacing: 0.12em;
+    }
+
+    .timer.is-low {
+      color: var(--error);
+      animation: timer-pulse 700ms ease-in-out infinite alternate;
+    }
+
+    .game-board {
+      flex: 1;
+      min-height: 400px;
+      background: var(--surface-container);
+      border-radius: 24px;
+      padding: var(--grid-padding);
+      border: 1px solid rgba(62, 72, 80, 0.3);
+      display: flex;
+      flex-direction: column;
+      gap: var(--stack-md);
+      position: relative;
+    }
+
+    .zone {
+      flex: 1;
+      min-height: 150px;
+      background: var(--surface-container-low);
+      border-radius: 12px;
+      border: 1px solid rgba(62, 72, 80, 0.1);
+      padding: var(--grid-padding);
+      position: relative;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      justify-content: center;
+      transition: border-color 180ms ease, box-shadow 180ms ease, transform 180ms ease;
+    }
+
+    .zone.lower-zone {
+      border-style: dashed;
+    }
+
+    .zone.is-targeted {
+      border-color: rgba(137, 206, 255, 0.55);
+      box-shadow: inset 0 0 0 1px rgba(137, 206, 255, 0.25);
+    }
+
+    .zone.success {
+      border-color: rgba(92, 214, 142, 0.75);
+      box-shadow: 0 0 0 2px rgba(92, 214, 142, 0.2), inset 0 0 24px rgba(92, 214, 142, 0.08);
+    }
+
+    .zone.warning {
+      border-color: rgba(255, 180, 171, 0.7);
+      box-shadow: inset 0 0 24px rgba(255, 180, 171, 0.08);
+    }
+
+    .tile-grid {
+      display: flex;
+      flex-wrap: wrap;
+      justify-content: center;
+      gap: var(--tile-gap);
+      width: 100%;
+      max-width: 280px;
+      min-height: 82px;
+      align-content: center;
+    }
+
+    .divider {
+      display: flex;
+      align-items: center;
+      width: 100%;
+      padding: 0 var(--grid-padding);
+      opacity: 0.5;
+      color: var(--outline-variant);
+    }
+
+    .divider-line {
+      height: 1px;
+      flex: 1;
+      background: var(--outline-variant);
+    }
+
+    .divider .material-symbols-outlined {
+      margin: 0 var(--stack-sm);
+    }
+
+    .block-tray {
+      border-radius: 12px;
+      padding: var(--grid-padding);
+      margin-top: 2px;
+    }
+
+    .tray-row {
+      display: flex;
+      justify-content: center;
+      gap: var(--tray-gap, var(--tile-gap));
+      overflow-x: hidden;
+      padding-bottom: var(--stack-sm);
+      scrollbar-width: none;
+      flex-wrap: nowrap;
+    }
+
+    .tray-row::-webkit-scrollbar {
+      display: none;
+    }
+
+    .tile {
+      border: 1px solid rgba(255, 255, 255, 0.12);
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      cursor: grab;
+      position: relative;
+      touch-action: none;
+      transition: transform 150ms ease, filter 150ms ease, opacity 150ms ease;
+      flex-shrink: 0;
+      color: var(--tile-text);
+      background: var(--tile-bg);
+    }
+
+    .tile:active {
+      cursor: grabbing;
+      transform: scale(0.98);
+    }
+
+    .tile:hover {
+      transform: translateY(-3px);
+      filter: brightness(1.06);
+    }
+
+    .tile.is-dragging {
+      opacity: 0.72;
+      transform: scale(1.04);
+      z-index: 4;
+    }
+
+    .board-tile {
+      width: 80px;
+      height: 80px;
+      border-radius: 12px;
+    }
+
+    .tray-tile {
+      width: var(--tray-tile-size, 64px);
+      height: var(--tray-tile-size, 64px);
+      border-radius: clamp(6px, calc(var(--tray-tile-size, 64px) * 0.13), 8px);
+      flex-direction: column;
+    }
+
+    .tile-number {
+      display: block;
+      font-weight: 700;
+      line-height: 1;
+      letter-spacing: 0;
+      filter: drop-shadow(0 1px 1px rgba(255, 255, 255, 0.15));
+    }
+
+    .board-tile .tile-number {
+      font-size: 44px;
+    }
+
+    .tray-tile .tile-number {
+      font-size: clamp(12px, calc(var(--tray-tile-size, 64px) * 0.38), 24px);
+      margin-top: 2px;
+    }
+
+    .tile.long .tile-number {
+      font-size: 28px;
+    }
+
+    .tray-tile.long .tile-number {
+      font-size: clamp(9px, calc(var(--tray-tile-size, 64px) * 0.29), 18px);
+    }
+
+    .tile.xlong .tile-number {
+      font-size: 22px;
+    }
+
+    .tray-tile.xlong .tile-number {
+      font-size: clamp(8px, calc(var(--tray-tile-size, 64px) * 0.23), 15px);
+    }
+
+
+    .tile-blue {
+      --tile-bg: var(--primary-container);
+      --tile-text: var(--on-primary-container);
+    }
+
+    .tile-sky {
+      --tile-bg: var(--primary);
+      --tile-text: var(--on-primary);
+    }
+
+    .tile-pink {
+      --tile-bg: var(--secondary-container);
+      --tile-text: var(--on-secondary-container);
+    }
+
+    .tile-orange {
+      --tile-bg: var(--tertiary-container);
+      --tile-text: var(--on-tertiary-container);
+    }
+
+    .tile-peach {
+      --tile-bg: var(--tertiary);
+      --tile-text: var(--on-tertiary);
+    }
+
+    .tile-purple {
+      --tile-bg: #c735e7;
+      --tile-text: #fff3ff;
+    }
+
+    .tile-green {
+      --tile-bg: #98d85f;
+      --tile-text: #24350e;
+    }
+
+    .tile-yellow {
+      --tile-bg: #ffdc2f;
+      --tile-text: #2d2a00;
+    }
+
+    .ad-shell {
+      width: 100%;
+      background: var(--surface-container-lowest);
+      border-top: 1px solid rgba(62, 72, 80, 0.2);
+      padding: var(--stack-md);
+      display: flex;
+      justify-content: center;
+      margin-top: auto;
+    }
+
+    .ad-box {
+      width: 320px;
+      height: 50px;
+      background: var(--surface);
+      border: 1px dashed var(--outline-variant);
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      border-radius: 4px;
+      color: var(--outline);
+      font-size: 14px;
+      line-height: 20px;
+      letter-spacing: 0.05em;
+      font-weight: 700;
+    }
+
+    .menu-main {
+      flex: 1;
+      width: 100%;
+      max-width: 448px;
+      margin: 0 auto;
+      padding: 28px var(--container-margin) var(--stack-md);
+      display: flex;
+      flex-direction: column;
+      gap: var(--stack-md);
+      justify-content: center;
+    }
+
+    .menu-mark {
+      min-height: 234px;
+      background: var(--surface-container);
+      border: 1px solid rgba(62, 72, 80, 0.3);
+      border-radius: 24px;
+      padding: 24px;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      justify-content: center;
+      gap: 18px;
+      box-shadow: inset 0 4px 8px rgba(0, 0, 0, 0.35), inset 0 -2px 4px rgba(255, 255, 255, 0.04);
+    }
+
+    .logo-grid {
+      display: grid;
+      grid-template-columns: repeat(2, 76px);
+      gap: 10px;
+    }
+
+    .logo-tile {
+      width: 76px;
+      height: 76px;
+      border-radius: 14px;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      font-size: 34px;
+      line-height: 1;
+      font-weight: 700;
+      border: 1px solid rgba(255, 255, 255, 0.12);
+    }
+
+    .menu-title {
+      margin: 0;
+      color: var(--primary-fixed-dim);
+      font-size: 32px;
+      line-height: 40px;
+      font-weight: 700;
+    }
+
+    .menu-subtitle {
+      margin: 0;
+      color: var(--on-surface-variant);
+      font-size: 16px;
+      line-height: 22px;
+      text-align: center;
+    }
+
+    .menu-actions {
+      display: grid;
+      gap: 10px;
+    }
+
+    .action-button {
+      min-height: 56px;
+      border: 0;
+      border-radius: 14px;
+      color: var(--on-primary);
+      background: var(--primary);
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      gap: 10px;
+      font-size: 18px;
+      line-height: 24px;
+      font-weight: 700;
+      cursor: pointer;
+      box-shadow: 0 4px 0 rgba(0, 0, 0, 0.35), 0 8px 16px rgba(0, 0, 0, 0.2), inset 0 2px 4px rgba(255, 255, 255, 0.22);
+      transition: transform 150ms ease, filter 150ms ease;
+    }
+
+    .action-button:hover {
+      filter: brightness(1.05);
+      transform: translateY(-1px);
+    }
+
+    .action-button:active {
+      transform: translateY(2px);
+      box-shadow: 0 2px 0 rgba(0, 0, 0, 0.35), 0 6px 12px rgba(0, 0, 0, 0.2), inset 0 2px 4px rgba(255, 255, 255, 0.18);
+    }
+
+    .action-button.secondary {
+      background: var(--surface-container-high);
+      color: var(--on-surface);
+      border: 1px solid rgba(62, 72, 80, 0.28);
+    }
+
+    .action-button.danger {
+      background: var(--error-container);
+      color: var(--on-error-container);
+    }
+
+    .action-button.daily {
+      background: linear-gradient(135deg, var(--primary-container), var(--tertiary-container));
+      color: var(--on-surface);
+    }
+
+    .action-button.daily.is-done {
+      background: var(--surface-container-high);
+      color: var(--on-surface-variant);
+      border: 1px solid rgba(62, 72, 80, 0.28);
+      box-shadow: 0 2px 0 rgba(0, 0, 0, 0.2), 0 4px 8px rgba(0, 0, 0, 0.12), inset 0 1px 2px rgba(255, 255, 255, 0.1);
+    }
+
+    .mini-stats {
+      display: grid;
+      grid-template-columns: repeat(2, 1fr);
+      gap: 10px;
+    }
+
+    .stat {
+      background: var(--surface-container-high);
+      border: 1px solid rgba(62, 72, 80, 0.2);
+      border-radius: 12px;
+      padding: 14px;
+      display: flex;
+      flex-direction: column;
+      gap: 4px;
+    }
+
+    .stat-label {
+      color: var(--on-surface-variant);
+      font-size: 12px;
+      line-height: 16px;
+      font-weight: 700;
+      letter-spacing: 0.05em;
+    }
+
+    .stat-value {
+      color: var(--on-surface);
+      font-size: 24px;
+      line-height: 30px;
+      font-weight: 700;
+    }
+
+    .modal {
+      position: fixed;
+      inset: 0;
+      z-index: 30;
+      display: none;
+      align-items: center;
+      justify-content: center;
+      padding: 24px;
+      background: rgba(10, 15, 19, 0.72);
+      backdrop-filter: blur(10px);
+    }
+
+    .modal.is-active {
+      display: flex;
+    }
+
+    .modal-panel {
+      width: 100%;
+      max-width: 400px;
+      background: var(--surface-container);
+      border: 1px solid rgba(62, 72, 80, 0.38);
+      border-radius: 24px;
+      padding: 18px;
+      box-shadow: 0 20px 40px rgba(0, 0, 0, 0.36), inset 0 2px 4px rgba(255, 255, 255, 0.04);
+    }
+
+    .modal-head {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      gap: 12px;
+      margin-bottom: 12px;
+    }
+
+    .modal-title {
+      margin: 0;
+      color: var(--primary-fixed-dim);
+      font-size: 24px;
+      line-height: 32px;
+      font-weight: 700;
+    }
+
+    .modal-body {
+      display: grid;
+      gap: 10px;
+    }
+
+    .tutorial-demo {
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      gap: 12px;
+      margin: 8px 0;
+    }
+
+    .tutorial-zone {
+      width: 100%;
+      height: 52px;
+      border: 2px dashed rgba(137, 206, 255, 0.3);
+      border-radius: 14px;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+    }
+
+    .tutorial-zone-label {
+      font-size: 13px;
+      color: var(--on-surface-variant);
+      font-weight: 600;
+      letter-spacing: 0.04em;
+    }
+
+    .tutorial-mid {
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      gap: 8px;
+    }
+
+    .tutorial-tile-sample {
+      width: 64px;
+      height: 64px;
+      background: var(--primary);
+      border-radius: 16px;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      font-size: 28px;
+      font-weight: 700;
+      color: #fff;
+      box-shadow: 0 4px 12px rgba(0,0,0,0.3);
+    }
+
+    .tutorial-hint {
+      display: flex;
+      align-items: center;
+      gap: 6px;
+      font-size: 14px;
+      font-weight: 600;
+      color: var(--on-surface-variant);
+    }
+
+    .tutorial-arrow {
+      font-size: 20px;
+      color: var(--primary-fixed-dim);
+    }
+
+    .tutorial-goal {
+      text-align: center;
+      font-size: 14px;
+      color: var(--on-surface-variant);
+      margin: 4px 0 8px;
+    }
+
+    .stats-grid {
+      display: grid;
+      grid-template-columns: 1fr 1fr;
+      gap: 10px;
+    }
+
+    .stat-card {
+      background: var(--surface-container-low);
+      border: 1px solid rgba(62, 72, 80, 0.28);
+      border-radius: 16px;
+      padding: 16px 12px 14px;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      gap: 4px;
+    }
+
+    .stat-card-wide {
+      grid-column: 1 / -1;
+    }
+
+    .stat-card-icon {
+      font-size: 22px;
+      line-height: 1;
+    }
+
+    .stat-card-value {
+      font-size: 28px;
+      font-weight: 800;
+      color: var(--on-surface);
+      line-height: 1.1;
+    }
+
+    .stat-card-label {
+      font-size: 11px;
+      font-weight: 600;
+      letter-spacing: 0.06em;
+      text-transform: uppercase;
+      color: var(--on-surface-variant);
+    }
+
+    .setting-row {
+      background: var(--surface-container-low);
+      border: 1px solid rgba(62, 72, 80, 0.22);
+      border-radius: 12px;
+      padding: 14px;
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      gap: 12px;
+    }
+
+    .setting-label {
+      display: flex;
+      align-items: center;
+      gap: 10px;
+      color: var(--on-surface);
+      font-weight: 700;
+    }
+
+    .recovery-panel {
+      display: none;
+      gap: 10px;
+    }
+
+    .recovery-panel.is-active {
+      display: grid;
+    }
+
+    .cooldown-text {
+      color: var(--on-surface-variant);
+      font-size: 16px;
+      line-height: 22px;
+      font-weight: 700;
+      text-align: center;
+    }
+
+    .fullscreen-ad {
+      position: fixed;
+      inset: 0;
+      z-index: 60;
+      display: none;
+      place-items: center;
+      padding: 24px;
+      background:
+        radial-gradient(circle at 50% 20%, rgba(137, 206, 255, 0.18), transparent 36%),
+        var(--surface-container-lowest);
+    }
+
+    .fullscreen-ad.is-active {
+      display: grid;
+    }
+
+    .ad-card {
+      width: min(360px, 100%);
+      min-height: 460px;
+      border-radius: 24px;
+      border: 1px solid rgba(62, 72, 80, 0.42);
+      background: var(--surface-container);
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      justify-content: center;
+      gap: 18px;
+      padding: 24px;
+      text-align: center;
+    }
+
+    .ad-count {
+      width: 88px;
+      height: 88px;
+      border-radius: 50%;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      background: var(--primary);
+      color: var(--on-primary);
+      font-size: 36px;
+      line-height: 42px;
+      font-weight: 700;
+    }
+
+    .toggle {
+      position: relative;
+      width: 52px;
+      height: 30px;
+      border: 0;
+      border-radius: 999px;
+      background: var(--surface-container-highest);
+      cursor: pointer;
+      transition: background 150ms ease;
+    }
+
+    .toggle::after {
+      content: "";
+      position: absolute;
+      top: 4px;
+      left: 4px;
+      width: 22px;
+      height: 22px;
+      border-radius: 50%;
+      background: var(--on-surface-variant);
+      transition: transform 150ms ease, background 150ms ease;
+    }
+
+    .toggle[aria-pressed="true"] {
+      background: var(--primary-container);
+    }
+
+    .toggle[aria-pressed="true"]::after {
+      transform: translateX(22px);
+      background: var(--primary-fixed);
+    }
+
+    .toast {
+      position: fixed;
+      left: 50%;
+      bottom: 84px;
+      transform: translateX(-50%) translateY(18px);
+      opacity: 0;
+      pointer-events: none;
+      z-index: 40;
+      background: var(--surface-container-highest);
+      color: var(--on-surface);
+      border: 1px solid rgba(62, 72, 80, 0.35);
+      border-radius: 999px;
+      padding: 10px 16px;
+      font-weight: 700;
+      box-shadow: 0 10px 28px rgba(0, 0, 0, 0.28);
+      transition: opacity 180ms ease, transform 180ms ease;
+    }
+
+    .toast.is-active {
+      opacity: 1;
+      transform: translateX(-50%) translateY(0);
+    }
+
+    .board-flash {
+      animation: board-shake 360ms ease;
+    }
+
+    .solved-pop {
+      animation: solved-pop 520ms ease;
+    }
+
+    /* ── Mechanic Unlock Celebration ─────────────────────────── */
+    #unlock-modal {
+      z-index: 40;
+      background: rgba(6, 10, 14, 0.88);
+      backdrop-filter: blur(16px);
+    }
+
+    .unlock-panel {
+      position: relative;
+      width: 100%;
+      max-width: 360px;
+      background: var(--surface-container);
+      border-radius: 28px;
+      padding: 32px 24px 28px;
+      text-align: center;
+      overflow: hidden;
+      border: 1px solid rgba(255,255,255,0.07);
+      box-shadow: 0 24px 60px rgba(0,0,0,0.5);
+    }
+
+    .unlock-shine {
+      position: absolute;
+      inset: 0;
+      background: radial-gradient(ellipse at 50% 30%, var(--unlock-color, #89ceff) 0%, transparent 65%);
+      opacity: 0.10;
+      pointer-events: none;
+      animation: unlock-shine-pulse 2s ease-in-out infinite;
+    }
+
+    @keyframes unlock-shine-pulse {
+      0%, 100% { opacity: 0.08; transform: scale(1); }
+      50%       { opacity: 0.18; transform: scale(1.05); }
+    }
+
+    .unlock-badge {
+      position: relative;
+      width: 90px;
+      height: 90px;
+      margin: 0 auto 20px;
+      border-radius: 28px;
+      background: color-mix(in srgb, var(--unlock-color, #89ceff) 18%, transparent);
+      border: 2px solid color-mix(in srgb, var(--unlock-color, #89ceff) 45%, transparent);
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      font-size: 34px;
+      font-weight: 800;
+      color: var(--unlock-color, #89ceff);
+      animation: unlock-badge-pop 0.55s cubic-bezier(0.34,1.56,0.64,1) both;
+      box-shadow: 0 0 32px color-mix(in srgb, var(--unlock-color, #89ceff) 35%, transparent);
+    }
+
+    @keyframes unlock-badge-pop {
+      0%   { transform: scale(0) rotate(-15deg); opacity: 0; }
+      70%  { transform: scale(1.15) rotate(4deg); }
+      100% { transform: scale(1) rotate(0deg); opacity: 1; }
+    }
+
+    .unlock-label {
+      font-size: 11px;
+      font-weight: 800;
+      letter-spacing: 0.14em;
+      text-transform: uppercase;
+      color: var(--unlock-color, #89ceff);
+      margin-bottom: 6px;
+      opacity: 0;
+      animation: unlock-fade-up 0.4s 0.35s ease forwards;
+    }
+
+    .unlock-name {
+      font-size: 26px;
+      font-weight: 800;
+      color: var(--on-surface);
+      line-height: 1.2;
+      margin-bottom: 10px;
+      opacity: 0;
+      animation: unlock-fade-up 0.4s 0.45s ease forwards;
+    }
+
+    .unlock-desc {
+      font-size: 14px;
+      color: var(--on-surface-variant);
+      line-height: 1.6;
+      margin-bottom: 24px;
+      opacity: 0;
+      animation: unlock-fade-up 0.4s 0.55s ease forwards;
+    }
+
+    @keyframes unlock-fade-up {
+      from { opacity: 0; transform: translateY(12px); }
+      to   { opacity: 1; transform: translateY(0); }
+    }
+
+    .unlock-sparkle {
+      position: absolute;
+      border-radius: 50%;
+      pointer-events: none;
+      animation: sparkle-burst var(--dur) ease-out var(--delay) both;
+    }
+
+    @keyframes sparkle-burst {
+      0%   { transform: translate(0,0) scale(0); opacity: 1; }
+      60%  { opacity: 1; }
+      100% { transform: translate(var(--tx), var(--ty)) scale(0.3); opacity: 0; }
+    }
+
+    .unlock-star {
+      position: absolute;
+      font-size: var(--sz);
+      pointer-events: none;
+      animation: star-spin var(--dur) ease-out var(--delay) both;
+      color: var(--unlock-color, #89ceff);
+    }
+
+    @keyframes star-spin {
+      0%   { transform: translate(0,0) scale(0) rotate(0deg); opacity: 1; }
+      100% { transform: translate(var(--tx), var(--ty)) scale(1) rotate(var(--rot)); opacity: 0; }
+    }
+
+    .confetti-layer {
+      position: fixed;
+      inset: 0;
+      pointer-events: none;
+      overflow: hidden;
+      z-index: 35;
+    }
+
+    .confetti {
+      position: absolute;
+      width: 8px;
+      height: 14px;
+      border-radius: 3px;
+      animation: confetti-fall 900ms ease forwards;
+    }
+
+    .daily-result-text {
+      background: var(--surface-container-low);
+      border: 1px solid rgba(62, 72, 80, 0.22);
+      border-radius: 12px;
+      padding: 16px;
+      color: var(--on-surface);
+      font-size: 14px;
+      line-height: 22px;
+      font-weight: 700;
+      white-space: pre-wrap;
+      text-align: center;
+    }
+
+    .share-row {
+      display: grid;
+      grid-template-columns: 1fr 1fr;
+      gap: 10px;
+    }
+
+    @keyframes timer-pulse {
+      from { opacity: 0.75; }
+      to { opacity: 1; }
+    }
+
+    @keyframes board-shake {
+      0%, 100% { transform: translateX(0); }
+      25% { transform: translateX(-6px); }
+      50% { transform: translateX(6px); }
+      75% { transform: translateX(-3px); }
+    }
+
+    @keyframes solved-pop {
+      0% { transform: scale(1); }
+      50% { transform: scale(1.025); }
+      100% { transform: scale(1); }
+    }
+
+    @keyframes confetti-fall {
+      0% {
+        opacity: 1;
+        transform: translate3d(0, -20px, 0) rotate(0deg);
+      }
+      100% {
+        opacity: 0;
+        transform: translate3d(var(--dx), 110vh, 0) rotate(540deg);
+      }
+    }
+
+    @media (max-width: 380px) {
+      :root {
+        --container-margin: 14px;
+        --grid-padding: 12px;
+      }
+
+      .brand-title {
+        font-size: 20px;
+      }
+
+      .timer {
+        font-size: 27px;
+      }
+
+      .board-tile {
+        width: 70px;
+        height: 70px;
+      }
+
+      .board-tile .tile-number {
+        font-size: 36px;
+      }
+
+      .tray-tile {
+        width: var(--tray-tile-size, 58px);
+        height: var(--tray-tile-size, 58px);
+      }
+    }
+
+    /* ── Coin System ──────────────────────────────────────────── */
+    .coin-counter {
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      gap: 8px;
+      background: linear-gradient(135deg, rgba(255,215,0,0.12), rgba(255,165,0,0.07));
+      border: 1px solid rgba(255,215,0,0.28);
+      border-radius: 16px;
+      padding: 12px 20px;
+      font-size: 22px;
+      font-weight: 800;
+      color: #ffd700;
+      letter-spacing: 0.02em;
+      text-shadow: 0 1px 6px rgba(0,0,0,0.5);
+    }
+
+    .coin-counter.bump { animation: coin-bump 280ms cubic-bezier(0.34,1.56,0.64,1); }
+
+    @keyframes coin-bump {
+      0%, 100% { transform: scale(1); }
+      50%       { transform: scale(1.16); }
+    }
+
+    .coin-float {
+      position: fixed;
+      pointer-events: none;
+      z-index: 50;
+      font-size: 19px;
+      font-weight: 800;
+      color: #ffd700;
+      text-shadow: 0 2px 8px rgba(0,0,0,0.8);
+      animation: coin-float-up 1.1s ease forwards;
+      white-space: nowrap;
+    }
+
+    @keyframes coin-float-up {
+      0%   { opacity: 1; transform: translateX(-50%) translateY(0) scale(1); }
+      55%  { opacity: 1; transform: translateX(-50%) translateY(-56px) scale(1.12); }
+      100% { opacity: 0; transform: translateX(-50%) translateY(-88px) scale(0.85); }
+    }
+
+    .zone-sum-badge {
+      position: absolute;
+      top: 8px;
+      right: 10px;
+      background: rgba(255,215,0,0.15);
+      border: 1px solid rgba(255,215,0,0.38);
+      border-radius: 8px;
+      padding: 3px 9px;
+      font-size: 13px;
+      font-weight: 800;
+      color: #ffd700;
+      pointer-events: none;
+      z-index: 3;
+      min-width: 38px;
+      text-align: center;
+    }
+
+    .helper-bar {
+      display: flex;
+      gap: 8px;
+      justify-content: center;
+    }
+
+    .helper-btn {
+      flex: 1;
+      max-width: 140px;
+      min-height: 46px;
+      border: 1px solid rgba(255,215,0,0.22);
+      border-radius: 12px;
+      background: rgba(255,215,0,0.06);
+      color: #ffd700;
+      font-size: 12px;
+      font-weight: 700;
+      font-family: inherit;
+      cursor: pointer;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      justify-content: center;
+      gap: 3px;
+      transition: background 140ms ease, transform 120ms ease, opacity 150ms ease;
+      padding: 6px 10px;
+      line-height: 1.2;
+    }
+
+    .helper-btn:hover  { background: rgba(255,215,0,0.13); }
+    .helper-btn:active { transform: scale(0.95); }
+
+    .helper-btn.is-active {
+      background: rgba(255,215,0,0.2);
+      border-color: rgba(255,215,0,0.5);
+      box-shadow: 0 0 10px rgba(255,215,0,0.15);
+    }
+
+    .helper-btn.cant-afford { opacity: 0.38; cursor: default; }
+    .helper-btn-label { font-size: 13px; }
+    .helper-btn-cost  { font-size: 10px; opacity: 0.75; }
+
+    .solution-reveal {
+      background: var(--surface-container-low);
+      border: 1px solid rgba(255,215,0,0.22);
+      border-radius: 12px;
+      padding: 12px;
+    }
+
+    .solution-header {
+      font-size: 11px;
+      font-weight: 800;
+      letter-spacing: 0.1em;
+      text-transform: uppercase;
+      color: #ffd700;
+      margin-bottom: 8px;
+      text-align: center;
+    }
+
+    .solution-row {
+      display: flex;
+      gap: 5px;
+      flex-wrap: wrap;
+      align-items: center;
+      margin-bottom: 5px;
+    }
+
+    .solution-row-label {
+      font-size: 11px;
+      font-weight: 700;
+      color: var(--on-surface-variant);
+      min-width: 36px;
+    }
+
+    .solution-chip {
+      background: var(--surface-container-high);
+      border: 1px solid rgba(62,72,80,0.3);
+      border-radius: 6px;
+      padding: 2px 7px;
+      font-size: 13px;
+      font-weight: 700;
+      color: var(--on-surface);
+    }
+
+    .tile-tooltip {
+      position: fixed;
+      z-index: 55;
+      background: rgba(16,20,24,0.97);
+      border: 1px solid rgba(255,215,0,0.5);
+      border-radius: 8px;
+      padding: 5px 12px;
+      font-size: 15px;
+      font-weight: 800;
+      color: #ffd700;
+      pointer-events: none;
+      white-space: nowrap;
+      box-shadow: 0 4px 16px rgba(0,0,0,0.6);
+    }
+
+    .game-coin-badge {
+      display: inline-flex;
+      align-items: center;
+      gap: 3px;
+      color: #ffd700;
+      font-size: 13px;
+      font-weight: 700;
+      background: rgba(255,215,0,0.08);
+      border: 1px solid rgba(255,215,0,0.2);
+      border-radius: 999px;
+      padding: 3px 8px;
+    }
+  </style>
+</head>
+<body>
+  <div class="app">
+    <section class="screen is-active" id="menu-screen">
+      <header class="top-app-bar">
+        <div class="brand">
+          <span class="material-symbols-outlined" aria-hidden="true">grid_view</span>
+          <h1 class="brand-title">Equal Blocks</h1>
+        </div>
+        <button class="icon-button" id="menu-settings-button" aria-label="Settings">
+          <span class="material-symbols-outlined" aria-hidden="true">settings</span>
+        </button>
+      </header>
+
+      <main class="menu-main">
+        <div class="menu-mark">
+          <div class="logo-grid" aria-hidden="true">
+            <div class="logo-tile tile-blue tile-shadow" style="color: var(--on-primary-container); background: var(--primary-container);">70</div>
+            <div class="logo-tile tile-pink tile-shadow" style="color: var(--on-secondary-container); background: var(--secondary-container);">30</div>
+            <div class="logo-tile tile-orange tile-shadow" style="color: var(--on-tertiary-container); background: var(--tertiary-container);">40</div>
+            <div class="logo-tile tile-sky tile-shadow" style="color: var(--on-primary); background: var(--primary);">60</div>
+          </div>
+          <h2 class="menu-title">Equal Blocks</h2>
+          <p class="menu-subtitle">Make both sides equal.</p>
+        </div>
+
+        <div id="coin-counter" class="coin-counter">
+          <span>🪙</span>
+          <span id="menu-coins">0</span>
+        </div>
+
+        <div class="mini-stats">
+          <div class="stat">
+            <span class="stat-label">CURRENT</span>
+            <span class="stat-value" id="menu-current-level">Lv. 1</span>
+          </div>
+          <div class="stat">
+            <span class="stat-label">BEST</span>
+            <span class="stat-value" id="menu-best-level">Lv. 1</span>
+          </div>
+          <div class="stat">
+            <span class="stat-label">LIVES</span>
+            <span class="stat-value" id="menu-bank-lives">5/5</span>
+          </div>
+          <div class="stat">
+            <span class="stat-label">REFILL</span>
+            <span class="stat-value" id="menu-refill-time">Ready</span>
+          </div>
+        </div>
+
+        <div class="menu-actions">
+          <button class="action-button" id="play-button">
+            <span class="material-symbols-outlined" aria-hidden="true">play_arrow</span>
+            Play
+          </button>
+          <button class="action-button daily" id="daily-button">
+            <span class="material-symbols-outlined" aria-hidden="true">calendar_today</span>
+            <span class="daily-btn-label">Daily Challenge</span>
+          </button>
+          <button class="action-button secondary" id="new-game-button">
+            <span class="material-symbols-outlined" aria-hidden="true">refresh</span>
+            New Game
+          </button>
+          <button class="action-button secondary" id="stats-button">
+            <span class="material-symbols-outlined" aria-hidden="true">emoji_events</span>
+            My Bests
+          </button>
+          <button class="action-button secondary" id="how-button">
+            <span class="material-symbols-outlined" aria-hidden="true">psychology</span>
+            Rules
+          </button>
+          <button class="action-button secondary" id="earn-coins-button">
+            +1000 🪙 — Watch Ad
+          </button>
+        </div>
+      </main>
+
+      <div class="ad-shell">
+        <div class="ad-box">Ad</div>
+      </div>
+    </section>
+
+    <section class="screen" id="game-screen">
+      <header class="top-app-bar">
+        <div class="brand">
+          <span class="material-symbols-outlined" aria-hidden="true">grid_view</span>
+          <h1 class="brand-title">Equal Blocks</h1>
+        </div>
+        <div class="level-pill">
+          <span id="level-label">Lv. 1</span>
+          <span class="game-coin-badge">🪙 <span id="game-coins">0</span></span>
+          <span class="life-bank" id="bank-lives-pill" aria-label="Game lives">
+            <span class="material-symbols-outlined" aria-hidden="true">favorite</span>
+            <span id="bank-lives-label">5</span>
+          </span>
+          <button class="icon-button" id="pause-button" aria-label="Pause">
+            <span class="material-symbols-outlined" aria-hidden="true">pause</span>
+          </button>
+        </div>
+      </header>
+
+      <main class="game-main">
+        <div class="status-bar inner-glow">
+          <div class="hearts" id="hearts" aria-label="Lives"></div>
+          <div class="timer" id="timer">00:45</div>
+        </div>
+
+        <div class="game-board recessed-tray" id="game-board">
+          <div class="zone upper-zone" id="upper-zone" data-zone="upper">
+            <div class="tile-grid" id="upper-grid"></div>
+          </div>
+
+          <div class="divider">
+            <div class="divider-line"></div>
+            <span class="material-symbols-outlined" aria-hidden="true">unfold_more</span>
+            <div class="divider-line"></div>
+          </div>
+
+          <div class="zone lower-zone" id="lower-zone" data-zone="lower">
+            <div class="tile-grid" id="lower-grid"></div>
+          </div>
+        </div>
+
+        <div class="block-tray">
+          <div class="tray-row" id="tray-row"></div>
+        </div>
+
+        <div class="helper-bar" id="helper-bar">
+          <button class="helper-btn" id="helper-sum-btn">
+            <span class="helper-btn-label">Σ Sum</span>
+            <span class="helper-btn-cost">300 🪙</span>
+          </button>
+          <button class="helper-btn" id="helper-skip-btn">
+            <span class="helper-btn-label">⏭ Skip</span>
+            <span class="helper-btn-cost">1500 🪙</span>
+          </button>
+        </div>
+      </main>
+
+      <div class="ad-shell">
+        <div class="ad-box">Ad</div>
+      </div>
+    </section>
+  </div>
+
+  <div class="modal" id="settings-modal" role="dialog" aria-modal="true" aria-labelledby="settings-title">
+    <div class="modal-panel recessed-tray">
+      <div class="modal-head">
+        <h2 class="modal-title" id="settings-title">Settings</h2>
+        <button class="icon-button" data-close-modal="settings-modal" aria-label="Close settings">
+          <span class="material-symbols-outlined" aria-hidden="true">close</span>
+        </button>
+      </div>
+      <div class="modal-body">
+        <div class="setting-row">
+          <span class="setting-label">
+            <span class="material-symbols-outlined" aria-hidden="true">volume_up</span>
+            Sound
+          </span>
+          <button class="toggle" id="sound-toggle" type="button" aria-label="Toggle sound" aria-pressed="true"></button>
+        </div>
+        <div class="setting-row">
+          <span class="setting-label">
+            <span class="material-symbols-outlined" aria-hidden="true">vibration</span>
+            Vibration
+          </span>
+          <button class="toggle" id="vibration-toggle" type="button" aria-label="Toggle vibration" aria-pressed="true"></button>
+        </div>
+        <button class="action-button danger" id="reset-progress-button">
+          <span class="material-symbols-outlined" aria-hidden="true">delete</span>
+          Reset Progress
+        </button>
+      </div>
+    </div>
+  </div>
+
+  <div class="modal" id="pause-modal" role="dialog" aria-modal="true" aria-labelledby="pause-title">
+    <div class="modal-panel recessed-tray">
+      <div class="modal-head">
+        <h2 class="modal-title" id="pause-title">Paused</h2>
+        <button class="icon-button" data-close-modal="pause-modal" aria-label="Resume">
+          <span class="material-symbols-outlined" aria-hidden="true">close</span>
+        </button>
+      </div>
+      <div class="modal-body">
+        <button class="action-button" id="resume-button">
+          <span class="material-symbols-outlined" aria-hidden="true">play_arrow</span>
+          Resume
+        </button>
+        <button class="action-button secondary" id="restart-button">
+          <span class="material-symbols-outlined" aria-hidden="true">replay</span>
+          Restart Level
+        </button>
+        <button class="action-button secondary" id="pause-settings-button">
+          <span class="material-symbols-outlined" aria-hidden="true">settings</span>
+          Settings
+        </button>
+        <button class="action-button secondary" id="quit-button">
+          <span class="material-symbols-outlined" aria-hidden="true">home</span>
+          Main Menu
+        </button>
+      </div>
+    </div>
+  </div>
+
+  <div class="modal" id="result-modal" role="dialog" aria-modal="true" aria-labelledby="result-title">
+    <div class="modal-panel recessed-tray">
+      <div class="modal-head">
+        <h2 class="modal-title" id="result-title">Balanced</h2>
+      </div>
+      <div class="modal-body">
+        <div class="mini-stats">
+          <div class="stat">
+            <span class="stat-label">NEXT</span>
+            <span class="stat-value" id="next-level-stat">Lv. 2</span>
+          </div>
+          <div class="stat">
+            <span class="stat-label">BONUS</span>
+            <span class="stat-value">+15s</span>
+          </div>
+        </div>
+        <button class="action-button" id="next-level-button">
+          <span class="material-symbols-outlined" aria-hidden="true">arrow_forward</span>
+          Next Level
+        </button>
+      </div>
+    </div>
+  </div>
+
+  <div class="modal" id="gameover-modal" role="dialog" aria-modal="true" aria-labelledby="gameover-title">
+    <div class="modal-panel recessed-tray">
+      <div class="modal-head">
+        <h2 class="modal-title" id="gameover-title">Try Again</h2>
+      </div>
+      <div class="modal-body">
+        <div class="mini-stats">
+          <div class="stat">
+            <span class="stat-label">GAME LIVES</span>
+            <span class="stat-value" id="gameover-bank-lives">5/5</span>
+          </div>
+          <div class="stat">
+            <span class="stat-label">REFILL</span>
+            <span class="stat-value" id="gameover-refill-time">Ready</span>
+          </div>
+        </div>
+        <button class="action-button" id="try-again-button">
+          <span class="material-symbols-outlined" aria-hidden="true">replay</span>
+          Try Again
+        </button>
+        <div class="recovery-panel" id="recovery-panel">
+          <div class="cooldown-text" id="recovery-message">Lives are refilling</div>
+          <button class="action-button" id="watch-ad-button">
+            <span class="material-symbols-outlined" aria-hidden="true">smart_display</span>
+            Watch Ad
+          </button>
+        </div>
+        <div class="solution-reveal" id="solution-reveal" style="display:none">
+          <div class="solution-header">💡 One Possible Solution</div>
+          <div id="solution-rows"></div>
+        </div>
+        <button class="action-button secondary" id="gameover-menu-button">
+          <span class="material-symbols-outlined" aria-hidden="true">home</span>
+          Main Menu
+        </button>
+      </div>
+    </div>
+  </div>
+
+  <div class="modal" id="rules-modal" role="dialog" aria-modal="true" aria-labelledby="rules-title">
+    <div class="modal-panel recessed-tray">
+      <div class="modal-head">
+        <h2 class="modal-title" id="rules-title">Rules</h2>
+        <button class="icon-button" data-close-modal="rules-modal" aria-label="Close rules">
+          <span class="material-symbols-outlined" aria-hidden="true">close</span>
+        </button>
+      </div>
+      <div class="modal-body">
+        <div class="setting-row">
+          <span class="setting-label">
+            <span class="material-symbols-outlined" aria-hidden="true">swap_vert</span>
+            Swipe a tile up or down
+          </span>
+        </div>
+        <div class="setting-row">
+          <span class="setting-label">
+            <span class="material-symbols-outlined" aria-hidden="true">balance</span>
+            Hidden totals must match
+          </span>
+        </div>
+        <div class="setting-row">
+          <span class="setting-label">
+            <span class="material-symbols-outlined" aria-hidden="true">timer</span>
+            Beat the timer
+          </span>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <div class="modal" id="stats-modal" role="dialog" aria-modal="true" aria-labelledby="stats-title">
+    <div class="modal-panel recessed-tray">
+      <div class="modal-head">
+        <h2 class="modal-title" id="stats-title">My Bests</h2>
+        <button class="icon-button" data-close-modal="stats-modal" aria-label="Close stats">
+          <span class="material-symbols-outlined" aria-hidden="true">close</span>
+        </button>
+      </div>
+      <div class="modal-body stats-grid">
+        <div class="stat-card">
+          <span class="stat-card-icon" style="color:#89ceff">🏆</span>
+          <span class="stat-card-value" id="sb-best-level">—</span>
+          <span class="stat-card-label">Highest Level</span>
+        </div>
+        <div class="stat-card">
+          <span class="stat-card-icon" style="color:#98d85f">✓</span>
+          <span class="stat-card-value" id="sb-total-solved">—</span>
+          <span class="stat-card-label">Puzzles Solved</span>
+        </div>
+        <div class="stat-card">
+          <span class="stat-card-icon" style="color:#ffdc2f">⚡</span>
+          <span class="stat-card-value" id="sb-best-time">—</span>
+          <span class="stat-card-label">Fastest Solve</span>
+        </div>
+        <div class="stat-card">
+          <span class="stat-card-icon" style="color:#ffb2b7">🔥</span>
+          <span class="stat-card-value" id="sb-best-streak">—</span>
+          <span class="stat-card-label">Best Streak</span>
+        </div>
+        <div class="stat-card stat-card-wide">
+          <span class="stat-card-icon" style="color:#c8aaff">◈</span>
+          <span class="stat-card-value" id="sb-best-daily">—</span>
+          <span class="stat-card-label">Best Daily Time</span>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <div class="modal" id="unlock-modal" role="dialog" aria-modal="true" aria-labelledby="unlock-name">
+    <div class="unlock-panel" id="unlock-panel">
+      <div class="unlock-shine" id="unlock-shine"></div>
+      <div class="unlock-badge" id="unlock-badge"></div>
+      <div class="unlock-label">Unlocked!</div>
+      <div class="unlock-name" id="unlock-name"></div>
+      <div class="unlock-desc" id="unlock-desc"></div>
+      <button class="action-button" id="unlock-lets-go">Let's Go!</button>
+    </div>
+  </div>
+
+  <div class="modal" id="tutorial-modal" role="dialog" aria-modal="true" aria-labelledby="tutorial-title">
+    <div class="modal-panel recessed-tray">
+      <div class="modal-head">
+        <h2 class="modal-title" id="tutorial-title">How to Play</h2>
+      </div>
+      <div class="modal-body">
+        <div class="tutorial-demo">
+          <div class="tutorial-zone">
+            <span class="tutorial-zone-label">Top row</span>
+          </div>
+          <div class="tutorial-mid">
+            <div class="tutorial-hint tutorial-hint-up">
+              <span class="tutorial-arrow">↑</span>
+              <span>Swipe up</span>
+            </div>
+            <div class="tutorial-tile-sample">7</div>
+            <div class="tutorial-hint tutorial-hint-down">
+              <span class="tutorial-arrow">↓</span>
+              <span>Swipe down</span>
+            </div>
+          </div>
+          <div class="tutorial-zone">
+            <span class="tutorial-zone-label">Bottom row</span>
+          </div>
+        </div>
+        <p class="tutorial-goal">Make both rows add up to the same total</p>
+      </div>
+      <button class="action-button" id="tutorial-got-it">Got it!</button>
+    </div>
+  </div>
+
+  <div class="modal" id="daily-result-modal" role="dialog" aria-modal="true" aria-labelledby="daily-result-title">
+    <div class="modal-panel recessed-tray">
+      <div class="modal-head">
+        <h2 class="modal-title" id="daily-result-title">Daily #1</h2>
+        <button class="icon-button" data-close-modal="daily-result-modal" aria-label="Close daily result">
+          <span class="material-symbols-outlined" aria-hidden="true">close</span>
+        </button>
+      </div>
+      <div class="modal-body">
+        <div class="daily-result-text" id="daily-result-text"></div>
+        <div class="mini-stats" id="daily-result-stats"></div>
+        <div class="share-row">
+          <button class="action-button" id="daily-share-button">
+            <span class="material-symbols-outlined" aria-hidden="true">share</span>
+            Share
+          </button>
+          <button class="action-button secondary" data-close-modal="daily-result-modal">
+            Close
+          </button>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <div class="toast" id="toast" role="status" aria-live="polite"></div>
+  <div class="confetti-layer" id="confetti-layer"></div>
+  <div class="fullscreen-ad" id="fullscreen-ad" aria-live="polite">
+    <div class="ad-card recessed-tray">
+      <div class="ad-count" id="ad-count">5</div>
+      <h2 class="modal-title">Sponsored Break</h2>
+      <p class="cooldown-text" id="ad-subtitle">Lives refill when the ad finishes.</p>
+    </div>
+  </div>
+
+  <script>
+    const STORAGE_KEY = "equalBlocksSave";
+    const STRIKES_PER_GAME = 3;
+    const MAX_GAME_LIVES = 5;
+    const LIFE_RECHARGE_SECONDS = 60;
+    const REWARDED_AD_SECONDS = 5;
+    const blockSteps = [4, 6, 8, 10];
+    const tileStyles = [
+      "tile-blue",
+      "tile-pink",
+      "tile-orange",
+      "tile-sky",
+      "tile-peach",
+      "tile-purple",
+      "tile-green",
+      "tile-yellow"
+    ];
+    const iconGlyphs = {
+      grid_view: "▦",
+      settings: "⚙",
+      play_arrow: "▶",
+      refresh: "↻",
+      psychology: "?",
+      favorite: "♥",
+      pause: "Ⅱ",
+      unfold_more: "⇅",
+      close: "×",
+      volume_up: "♪",
+      vibration: "≋",
+      delete: "⌫",
+      replay: "↻",
+      home: "⌂",
+      arrow_forward: "→",
+      smart_display: "▶",
+      swap_vert: "⇅",
+      balance: "=",
+      timer: "◷",
+      keyboard_arrow_up: "↑",
+      keyboard_arrow_down: "↓",
+      calendar_today: "◈",
+      check_circle: "✓",
+      share: "↑"
+    };
+
+    const state = {
+      level: 1,
+      bestLevel: 1,
+      lives: STRIKES_PER_GAME,
+      gameLives: MAX_GAME_LIVES,
+      livesReadyAt: null,
+      timeLeft: 45,
+      bonusTime: 0,
+      coins: 0,
+      sumDisplayActive: false,
+      levelTimeLimit: 45,
+      longPressTimer: null,
+      currentTiles: [],
+      upper: [],
+      lower: [],
+      tray: [],
+      timerId: null,
+      rechargeTimerId: null,
+      adTimerId: null,
+      adSecondsLeft: REWARDED_AD_SECONDS,
+      isPlaying: false,
+      isPaused: false,
+      solved: false,
+      activeScreen: "menu",
+      settings: {
+        sound: true,
+        vibration: true
+      },
+      drag: null,
+      lastAttemptSignature: "",
+      daily: {
+        date: null,
+        won: null,
+        timeTaken: null,
+        streak: 0
+      },
+      isDailyMode: false,
+      dailyStartTime: null,
+      levelStartTime: null,
+      stats: {
+        totalSolved: 0,
+        bestSolveTime: null,
+        bestDailyTime: null,
+        bestStreak: 0,
+      }
+    };
+
+    const $ = (selector) => document.querySelector(selector);
+    const $$ = (selector) => [...document.querySelectorAll(selector)];
+
+    function iconGlyph(name) {
+      return iconGlyphs[name] || name;
+    }
+
+    function normalizeIcons(root = document) {
+      root.querySelectorAll(".material-symbols-outlined").forEach((icon) => {
+        const raw = icon.dataset.iconName || icon.textContent.trim();
+        icon.dataset.iconName = raw;
+        icon.textContent = iconGlyph(raw);
+      });
+    }
+
+    const els = {
+      menuScreen: $("#menu-screen"),
+      gameScreen: $("#game-screen"),
+      levelLabel: $("#level-label"),
+      hearts: $("#hearts"),
+      timer: $("#timer"),
+      board: $("#game-board"),
+      upperZone: $("#upper-zone"),
+      lowerZone: $("#lower-zone"),
+      upperGrid: $("#upper-grid"),
+      lowerGrid: $("#lower-grid"),
+      trayRow: $("#tray-row"),
+      menuCurrentLevel: $("#menu-current-level"),
+      menuBestLevel: $("#menu-best-level"),
+      menuBankLives: $("#menu-bank-lives"),
+      menuRefillTime: $("#menu-refill-time"),
+      settingsModal: $("#settings-modal"),
+      pauseModal: $("#pause-modal"),
+      resultModal: $("#result-modal"),
+      gameoverModal: $("#gameover-modal"),
+      rulesModal: $("#rules-modal"),
+      toast: $("#toast"),
+      confettiLayer: $("#confetti-layer"),
+      soundToggle: $("#sound-toggle"),
+      vibrationToggle: $("#vibration-toggle"),
+      resultTitle: $("#result-title"),
+      gameoverTitle: $("#gameover-title"),
+      nextLevelStat: $("#next-level-stat"),
+      bankLivesPill: $("#bank-lives-pill"),
+      bankLivesLabel: $("#bank-lives-label"),
+      gameoverBankLives: $("#gameover-bank-lives"),
+      gameoverRefillTime: $("#gameover-refill-time"),
+      recoveryPanel: $("#recovery-panel"),
+      recoveryMessage: $("#recovery-message"),
+      tryAgainButton: $("#try-again-button"),
+      watchAdButton: $("#watch-ad-button"),
+      fullscreenAd: $("#fullscreen-ad"),
+      adCount: $("#ad-count")
+    };
+
+    function loadSave() {
+      try {
+        const saved = JSON.parse(localStorage.getItem(STORAGE_KEY) || "{}");
+        state.level = Number.isFinite(saved.level) ? Math.max(1, saved.level) : 1;
+        state.bestLevel = Number.isFinite(saved.bestLevel) ? Math.max(1, saved.bestLevel) : state.level;
+        state.gameLives = Number.isFinite(saved.gameLives)
+          ? Math.max(0, Math.min(MAX_GAME_LIVES, saved.gameLives))
+          : MAX_GAME_LIVES;
+        state.livesReadyAt = Number.isFinite(saved.livesReadyAt) ? saved.livesReadyAt : null;
+        state.coins = Number.isFinite(saved.coins) ? Math.max(0, saved.coins) : 0;
+        state.settings.sound = saved.settings?.sound !== false;
+        state.settings.vibration = saved.settings?.vibration !== false;
+        const d = saved.daily || {};
+        state.daily.date = typeof d.date === "string" ? d.date : null;
+        state.daily.won = typeof d.won === "boolean" ? d.won : null;
+        state.daily.timeTaken = Number.isFinite(d.timeTaken) ? d.timeTaken : null;
+        state.daily.streak = Number.isFinite(d.streak) ? Math.max(0, d.streak) : 0;
+        const st = saved.stats || {};
+        state.stats.totalSolved   = Number.isFinite(st.totalSolved)  ? st.totalSolved  : 0;
+        state.stats.bestSolveTime = Number.isFinite(st.bestSolveTime) ? st.bestSolveTime : null;
+        state.stats.bestDailyTime = Number.isFinite(st.bestDailyTime) ? st.bestDailyTime : null;
+        state.stats.bestStreak    = Number.isFinite(st.bestStreak)    ? st.bestStreak    : 0;
+        syncLifeRecharge();
+        if (state.gameLives <= 0) startLifeRecharge();
+      } catch {
+        state.level = 1;
+        state.bestLevel = 1;
+        state.gameLives = MAX_GAME_LIVES;
+        state.livesReadyAt = null;
+      }
+    }
+
+    function saveGame() {
+      localStorage.setItem(STORAGE_KEY, JSON.stringify({
+        level: state.level,
+        bestLevel: state.bestLevel,
+        gameLives: state.gameLives,
+        livesReadyAt: state.livesReadyAt,
+        coins: state.coins,
+        settings: state.settings,
+        daily: state.daily,
+        stats: state.stats
+      }));
+    }
+
+    function showScreen(screen) {
+      state.activeScreen = screen;
+      els.menuScreen.classList.toggle("is-active", screen === "menu");
+      els.gameScreen.classList.toggle("is-active", screen === "game");
+      renderMenu();
+    }
+
+    function openModal(id) {
+      const modal = document.getElementById(id);
+      if (!modal) return;
+      modal.classList.add("is-active");
+      if (id === "pause-modal") {
+        state.isPaused = true;
+      }
+      renderToggles();
+    }
+
+    function closeModal(id) {
+      const modal = document.getElementById(id);
+      if (!modal) return;
+      modal.classList.remove("is-active");
+      if (id === "pause-modal") {
+        state.isPaused = false;
+      }
+    }
+
+    function closeAllModals() {
+      $$(" .modal").forEach((modal) => modal.classList.remove("is-active"));
+      state.isPaused = false;
+    }
+
+    function renderMenu() {
+      syncLifeRecharge();
+      els.menuCurrentLevel.textContent = `Lv. ${state.level}`;
+      els.menuBestLevel.textContent = `Lv. ${state.bestLevel}`;
+      els.menuBankLives.textContent = `${state.gameLives}/${MAX_GAME_LIVES}`;
+      els.menuRefillTime.textContent = state.gameLives > 0 ? "Ready" : formatTime(getRechargeSecondsLeft());
+      renderLifeBank();
+      updateDailyButton();
+      updateCoinDisplay();
+    }
+
+    function renderToggles() {
+      els.soundToggle.setAttribute("aria-pressed", String(state.settings.sound));
+      els.vibrationToggle.setAttribute("aria-pressed", String(state.settings.vibration));
+    }
+
+    function syncLifeRecharge() {
+      if (state.gameLives <= 0 && state.livesReadyAt && Date.now() >= state.livesReadyAt) {
+        restoreGameLives(false);
+      }
+    }
+
+    function startLifeRecharge() {
+      if (state.gameLives > 0) return;
+      if (!state.livesReadyAt) {
+        state.livesReadyAt = Date.now() + LIFE_RECHARGE_SECONDS * 1000;
+        saveGame();
+      }
+      startRechargeTicker();
+    }
+
+    function startRechargeTicker() {
+      if (state.rechargeTimerId) return;
+      state.rechargeTimerId = window.setInterval(() => {
+        syncLifeRecharge();
+        renderLifeBank();
+        renderMenu();
+        renderGameOverState();
+      }, 1000);
+    }
+
+    function clearRechargeTimer() {
+      if (state.rechargeTimerId) {
+        window.clearInterval(state.rechargeTimerId);
+        state.rechargeTimerId = null;
+      }
+    }
+
+    function restoreGameLives(showMessage = true) {
+      state.gameLives = MAX_GAME_LIVES;
+      state.livesReadyAt = null;
+      clearRechargeTimer();
+      saveGame();
+      renderLifeBank();
+      renderMenu();
+      renderGameOverState();
+      if (showMessage) showToast("Lives refilled");
+    }
+
+    function getRechargeSecondsLeft() {
+      if (!state.livesReadyAt) return 0;
+      return Math.max(0, Math.ceil((state.livesReadyAt - Date.now()) / 1000));
+    }
+
+    function renderLifeBank() {
+      syncLifeRecharge();
+      const label = `${state.gameLives}`;
+      els.bankLivesLabel.textContent = label;
+      els.bankLivesPill.classList.toggle("is-empty", state.gameLives <= 0);
+    }
+
+    function renderGameOverState() {
+      if (!els.gameoverBankLives) return;
+      syncLifeRecharge();
+      const outOfLives = state.gameLives <= 0;
+      els.gameoverBankLives.textContent = `${state.gameLives}/${MAX_GAME_LIVES}`;
+      els.gameoverRefillTime.textContent = outOfLives ? formatTime(getRechargeSecondsLeft()) : "Ready";
+      els.recoveryPanel.classList.toggle("is-active", outOfLives);
+      els.tryAgainButton.style.display = outOfLives ? "none" : "flex";
+      els.recoveryMessage.textContent = outOfLives
+        ? `Lives refill in ${formatTime(getRechargeSecondsLeft())}`
+        : "";
+      if (!outOfLives && els.gameoverModal.classList.contains("is-active")) {
+        els.gameoverTitle.textContent = "Try Again";
+      }
+    }
+
+    function canStartGame() {
+      syncLifeRecharge();
+      return state.gameLives > 0;
+    }
+
+    function spendGameLife() {
+      if (state.gameLives <= 0) return;
+      state.gameLives = Math.max(0, state.gameLives - 1);
+      if (state.gameLives <= 0) {
+        startLifeRecharge();
+      }
+      saveGame();
+      renderLifeBank();
+      renderMenu();
+    }
+
+    function showOutOfLives() {
+      clearTimer();
+      state.isPlaying = false;
+      state.solved = true;
+      startLifeRecharge();
+      els.gameoverTitle.textContent = "No lives left";
+      renderGameOverState();
+      openModal("gameover-modal");
+    }
+
+    function getLevelSettings(level) {
+      // Phase boundaries (cumulative level counts)
+      const P1_END = 88;   // 4/6 tiles, plain→all mechanics
+      const P2_END = 216;  // 6/8 tiles, same mechanic cycle
+      const P3_END = 344;  // 6/8 tiles, + negative squares/roots
+      const P4_END = 472;  // 6/8 tiles, + x³/∛x
+
+      // Wave level counts per wave index (0-15) for each phase group
+      const P1_COUNTS = [3,3,3,3, 5,5,5,5, 7,7,7,7,7,7,7,7];   // 12+20+56=88
+      const P2_COUNTS = [5,5,5,5, 7,7,7,7, 10,10,10,10,10,10,10,10]; // 20+28+80=128
+
+      let phaseNum, phaseStart, waveCounts;
+      if      (level <= P1_END) { phaseNum = 1; phaseStart = 1;        waveCounts = P1_COUNTS; }
+      else if (level <= P2_END) { phaseNum = 2; phaseStart = P1_END+1; waveCounts = P2_COUNTS; }
+      else if (level <= P3_END) { phaseNum = 3; phaseStart = P2_END+1; waveCounts = P2_COUNTS; }
+      else if (level <= P4_END) { phaseNum = 4; phaseStart = P3_END+1; waveCounts = P2_COUNTS; }
+      else                      { phaseNum = 5; phaseStart = P4_END+1; waveCounts = P2_COUNTS; }
+
+      // Find which wave (0-based index) and position within it
+      let rem = level - phaseStart;
+      let wi = 0;
+      while (wi < 15 && rem >= waveCounts[wi]) { rem -= waveCounts[wi]; wi++; }
+      const waveNum      = wi + 1;                                        // 1-16
+      const levelsInWave = waveCounts[wi];
+      const posInWave    = rem;                                            // 0-based
+      const waveProgress = levelsInWave > 1 ? posInWave / (levelsInWave - 1) : 0; // 0→1
+
+      // Mechanics: each pair of waves shares a combo (3-bit binary on pair index)
+      // pair 0=plain, 1=+neg, 2=+sq, 3=+neg+sq, 4=+root, 5=+neg+root, 6=+sq+root, 7=all
+      const pairIdx  = Math.floor((waveNum - 1) / 2); // 0-7
+      const allowNeg  = !!(pairIdx & 1);
+      const allowSq   = !!(pairIdx & 2);
+      const allowRoot = !!(pairIdx & 4);
+
+      // Phase 4+ adds x³/∛x; endless escalates further
+      let maxPow = phaseNum >= 4 ? 3 : 2;
+      let maxRootDeg = phaseNum >= 4 ? 3 : 2;
+      if (phaseNum >= 5) {
+        const bonus = Math.floor((level - P4_END - 1) / 128);
+        maxPow    = 4 + bonus;
+        maxRootDeg = 4 + bonus;
+      }
+
+      // Tile count: odd waves use base tiles, even waves switch to higher tiles
+      // at 60% wave progress (sawtooth: numbers reset when tiles increase)
+      const isEvenWave    = waveNum % 2 === 0;
+      const baseTiles     = phaseNum === 1 ? 4 : 6;
+      const highTiles     = phaseNum === 1 ? 6 : 8;
+      const highTileCount = Math.round(levelsInWave * 0.4);
+      const blockCount    = (isEvenWave && posInWave >= levelsInWave - highTileCount) ? highTiles : baseTiles;
+
+      // Number range: sawtooth within each wave, slowly rising baseline across waves
+      // Phase 1 scale = 1×; Phase 2 = 2.2×; Phase 3 = 3.2×; Phase 4 = 4.5×; Endless = 6×
+      const WAVE_RANGES = [
+        [ 8, 15], [10, 22],  // W1-W2  plain
+        [ 8, 17], [12, 26],  // W3-W4  +neg
+        [10, 20], [14, 30],  // W5-W6  +sq
+        [12, 24], [16, 34],  // W7-W8  +neg+sq
+        [14, 27], [18, 37],  // W9-W10 +root
+        [16, 31], [20, 42],  // W11-W12 +neg+root
+        [18, 35], [22, 46],  // W13-W14 +sq+root
+        [20, 39], [24, 52],  // W15-W16 all
+      ];
+      const PHASE_SCALE = [1, 2.2, 3.2, 4.5, 6.0];
+      const scale   = PHASE_SCALE[Math.min(phaseNum - 1, 4)];
+      const [rMin, rMax] = WAVE_RANGES[wi];
+      const numberRange  = Math.round(scale * (rMin + waveProgress * (rMax - rMin)));
+
+      // Timer: derived from cognitive load study + 10s player buffer
+      // step cost per tile per attempt based on active mechanics
+      const STEP_COSTS = [1.5, 2.1, 2.5, 3.1, 2.5, 3.1, 3.5, 4.1];
+      const stepCost = STEP_COSTS[pairIdx];
+      const timeLimit = Math.round((20 + blockCount * 0.3 + 3 * blockCount * stepCost) / 5) * 5;
+
+      // Mechanic chances: scale with wave progress (gentle at start, fuller at end)
+      const chScale      = 0.25 + waveProgress * 0.45;
+      const negChance    = allowNeg  ? chScale * 0.50 : 0;  // up to ~31%
+      const powChance    = allowSq   ? chScale * 0.42 : 0;  // up to ~31%
+      const rootChance   = allowRoot ? chScale * 0.38 : 0;  // up to ~32%
+
+      return {
+        level, phaseNum, waveNum, posInWave, waveProgress,
+        blockCount, numbersPerSide: blockCount / 2,
+        numberRange, timeLimit,
+        allowNegative: allowNeg,
+        allowPower:    allowSq,
+        allowRoot,
+        negativeChance: negChance,
+        powerChance:    powChance,
+        rootChance,
+        maxPower:      maxPow,
+        maxRootDegree: maxRootDeg,
+        // shims used by generateLevel and tileFromValue
+        floor: phaseNum,
+        step:  Math.floor(waveProgress * 3),
+      };
+    }
+
+    function generateLevel(level) {
+      const settings = getLevelSettings(level);
+      const count = settings.numbersPerSide;
+      const targetMin = Math.max(12, Math.round(settings.numberRange * 0.75));
+      const targetMax = Math.max(targetMin + 8, Math.round(settings.numberRange * (1.4 + settings.step * 0.12)));
+
+      for (let attempt = 0; attempt < 400; attempt++) {
+        const target = randInt(targetMin, targetMax);
+        const upper = generateSide(count, target, settings, chooseForcedKinds(settings, "upper"));
+        const lower = generateSide(count, target, settings, chooseForcedKinds(settings, "lower"));
+
+        if (upper && lower) {
+          const tiles = shuffle([...upper, ...lower]).map((tile, index) => ({
+            ...tile,
+            id: `${level}-${index}-${Math.random().toString(36).slice(2, 8)}`,
+            color: tileStyles[index % tileStyles.length]
+          }));
+          return { settings, tiles };
+        }
+      }
+
+      return generateFallbackLevel(level, settings);
+    }
+
+    function chooseForcedKinds(settings, side) {
+      const forced = [];
+      if (settings.allowNegative && side === "upper") forced.push("negative");
+      if (settings.allowPower    && side === "upper") forced.push("power");
+      if (settings.allowRoot     && side === "lower") forced.push("root");
+      return forced;
+    }
+
+    function generateSide(count, target, settings, forcedKinds) {
+      for (let attempt = 0; attempt < 120; attempt++) {
+        const tiles = [];
+        let sum = 0;
+
+        for (let i = 0; i < count - 1; i++) {
+          const forcedKind = forcedKinds[i] || null;
+          const tile = randomTile(settings, forcedKind);
+          tiles.push(tile);
+          sum += tile.value;
+        }
+
+        const finalValue = roundValue(target - sum);
+        if (!isValidFinalValue(finalValue, settings)) continue;
+
+        tiles.push(tileFromValue(finalValue, settings));
+        return tiles;
+      }
+
+      return null;
+    }
+
+    function generateFallbackLevel(level, settings) {
+      const count = settings.numbersPerSide;
+      const target = 20 + level * 3;
+      const upper = simplePartition(count, target, settings);
+      const lower = simplePartition(count, target, settings);
+      const tiles = shuffle([...upper, ...lower]).map((tile, index) => ({
+        ...tile,
+        id: `${level}-fallback-${index}`,
+        color: tileStyles[index % tileStyles.length]
+      }));
+      return { settings, tiles };
+    }
+
+    function simplePartition(count, target, settings) {
+      const values = [];
+      let remaining = target;
+      for (let i = 0; i < count - 1; i++) {
+        const slots = count - i;
+        const value = Math.max(1, Math.floor(remaining / slots));
+        values.push(value);
+        remaining -= value;
+      }
+      values.push(remaining);
+      return values.map((value) => tileFromValue(value, settings));
+    }
+
+    function randomTile(settings, forcedKind = null) {
+      const roll = Math.random();
+      if (forcedKind === "power") return randomPowerTile(settings);
+      if (forcedKind === "root") return randomRootTile(settings);
+      if (forcedKind === "negative") return randomNegativeTile(settings);
+
+      if (settings.allowPower && roll < settings.powerChance) return randomPowerTile(settings);
+      if (settings.allowRoot && roll < settings.powerChance + settings.rootChance) return randomRootTile(settings);
+      if (settings.allowNegative && Math.random() < settings.negativeChance) return randomNegativeTile(settings);
+
+      return tileFromValue(randInt(2, Math.max(4, settings.numberRange)), settings, true);
+    }
+
+    function randomNegativeTile(settings) {
+      const max = Math.max(3, Math.round(settings.numberRange * 0.45));
+      const value = -randInt(1, max);
+      return {
+        label: String(value),
+        value,
+        kind: "negative"
+      };
+    }
+
+    function randomPowerTile(settings) {
+      const safeDegree = getSafePowerDegree(settings);
+      const degree = randInt(2, safeDegree);
+      const maxBase = Math.max(2, Math.floor(Math.pow(Math.max(4, settings.numberRange * 1.2), 1 / degree)));
+      const base = randInt(2, Math.min(9, maxBase));
+      const value = Math.pow(base, degree);
+      return {
+        label: `${base}${toSuperscript(degree)}`,
+        value,
+        kind: "power"
+      };
+    }
+
+    function randomRootTile(settings) {
+      const degree = randInt(2, Math.max(2, settings.maxRootDegree));
+      const maxResult = degree > 5 ? 4 : Math.max(3, Math.min(9, Math.floor(settings.numberRange / 5)));
+      const result = randInt(2, maxResult);
+      const radicand = Math.pow(result, degree);
+      return {
+        label: formatRoot(degree, radicand),
+        value: result,
+        kind: "root"
+      };
+    }
+
+    function getSafePowerDegree(settings) {
+      const byRange = Math.max(2, Math.floor(Math.log(Math.max(4, settings.numberRange * 1.5)) / Math.log(2)));
+      return Math.max(2, Math.min(settings.maxPower, byRange));
+    }
+
+    function tileFromValue(value, settings, forcePlain = false) {
+      const rounded = roundValue(value);
+      const rootWrapLimit = settings.phaseNum <= 1
+        ? 12
+        : Math.max(12, Math.round(settings.numberRange / 6));
+      if (!forcePlain && rounded > 1 && rounded <= rootWrapLimit && settings.allowRoot && Math.random() < settings.rootChance * 0.45) {
+        const degree = randInt(2, Math.max(2, Math.min(settings.maxRootDegree, 5)));
+        const radicand = Math.pow(rounded, degree);
+        if (Number.isFinite(radicand) && String(radicand).length <= 6) {
+          return {
+            label: formatRoot(degree, radicand),
+            value: rounded,
+            kind: "root"
+          };
+        }
+      }
+
+      return {
+        label: String(rounded),
+        value: rounded,
+        kind: rounded < 0 ? "negative" : "plain"
+      };
+    }
+
+    function isValidFinalValue(value, settings) {
+      if (!Number.isFinite(value) || Math.abs(value) < 0.01) return false;
+      if (!settings.allowNegative && value <= 0) return false;
+      const cap = Math.max(settings.numberRange * 3, 30);
+      return Math.abs(value) <= cap;
+    }
+
+    function startLevel(level = state.level) {
+      if (!canStartGame()) {
+        showOutOfLives();
+        return;
+      }
+
+      closeAllModals();
+      clearTimer();
+
+      const levelData = generateLevel(level);
+      state.level = level;
+      state.lives = STRIKES_PER_GAME;
+      state.currentTiles = levelData.tiles;
+      state.upper = [];
+      state.lower = [];
+      state.tray = levelData.tiles.map((tile) => tile.id);
+      state.levelTimeLimit = levelData.settings.timeLimit;
+      state.timeLeft = levelData.settings.timeLimit + state.bonusTime;
+      state.bonusTime = 0;
+      state.solved = false;
+      state.isPlaying = true;
+      state.isPaused = false;
+      state.lastAttemptSignature = "";
+      state.isDailyMode = false;
+      state.sumDisplayActive = false;
+      document.querySelectorAll('.zone-sum-badge').forEach(el => el.remove());
+      const revealEl = document.getElementById('solution-reveal');
+      if (revealEl) revealEl.style.display = 'none';
+
+      state.levelStartTime = Date.now();
+      saveGame();
+      showScreen("game");
+      renderGame();
+      startTimer();
+    }
+
+    function renderGame() {
+      els.levelLabel.textContent = state.isDailyMode ? `Daily` : `Lv. ${state.level}`;
+      renderLifeBank();
+      renderHearts();
+      renderTimer();
+      renderZone("upper");
+      renderZone("lower");
+      renderTray();
+      renderHelperBar();
+      updateCoinDisplay();
+      if (state.sumDisplayActive) updateZoneSumBadges();
+    }
+
+    function renderHearts() {
+      els.hearts.innerHTML = "";
+      for (let i = 0; i < STRIKES_PER_GAME; i++) {
+        const heart = document.createElement("span");
+        heart.className = "material-symbols-outlined" + (i >= state.lives ? " empty" : "");
+        heart.style.fontVariationSettings = i < state.lives ? "'FILL' 1" : "'FILL' 0";
+        heart.dataset.iconName = "favorite";
+        heart.textContent = iconGlyph("favorite");
+        els.hearts.appendChild(heart);
+      }
+    }
+
+    function renderTimer() {
+      els.timer.textContent = formatTime(state.timeLeft);
+      els.timer.classList.toggle("is-low", state.timeLeft <= 10);
+    }
+
+    function renderZone(zone) {
+      const grid = zone === "upper" ? els.upperGrid : els.lowerGrid;
+      const ids = state[zone];
+      grid.innerHTML = "";
+      ids.forEach((id) => grid.appendChild(createTileElement(getTile(id), zone)));
+    }
+
+    function renderTray() {
+      els.trayRow.innerHTML = "";
+      setTrayMetrics();
+      state.tray.forEach((id) => els.trayRow.appendChild(createTileElement(getTile(id), "tray")));
+    }
+
+    function setTrayMetrics() {
+      const count = Math.max(1, state.currentTiles.length || state.tray.length || 4);
+      const rowWidth = els.trayRow.clientWidth
+        || Math.min(360, Math.max(220, (window.innerWidth || 390) - 80));
+      const gap = count >= 10 ? 4 : count >= 8 ? 5 : count >= 6 ? 6 : 8;
+      const available = rowWidth - gap * (count - 1);
+      const maxSize = count <= 4 ? 64 : count <= 6 ? 58 : count <= 8 ? 48 : 40;
+      const tileSize = Math.max(24, Math.min(maxSize, Math.floor(available / count)));
+
+      els.trayRow.style.setProperty("--tray-gap", `${gap}px`);
+      els.trayRow.style.setProperty("--tray-tile-size", `${tileSize}px`);
+    }
+
+    function createTileElement(tile, zone) {
+      const div = document.createElement("div");
+      const sizeClass = zone === "tray" ? "tray-tile" : "board-tile";
+      div.className = `tile ${sizeClass} ${tile.color} tile-shadow ${getLengthClass(tile.label)}`;
+      div.dataset.tileId = tile.id;
+      div.dataset.zone = zone;
+      div.setAttribute("role", "button");
+      div.setAttribute("aria-label", `Tile ${tile.label}`);
+
+      const label = document.createElement("span");
+      label.className = "tile-number";
+      label.textContent = tile.label;
+      div.appendChild(label);
+
+      if (zone === "tray") {
+      }
+
+      div.addEventListener("pointerdown", onTilePointerDown);
+      div.addEventListener("pointerup", onTilePointerUp);
+      div.addEventListener("pointercancel", onTilePointerCancel);
+      return div;
+    }
+
+    function getLengthClass(label) {
+      if (String(label).length >= 6) return "xlong";
+      if (String(label).length >= 4) return "long";
+      return "";
+    }
+
+    function onTilePointerDown(event) {
+      if (!state.isPlaying || state.solved) return;
+      const tile = event.currentTarget;
+      tile.setPointerCapture?.(event.pointerId);
+      tile.classList.add("is-dragging");
+      const startX = event.clientX;
+      const startY = event.clientY;
+      state.drag = {
+        id: tile.dataset.tileId,
+        zone: tile.dataset.zone,
+        startX,
+        startY,
+        startedAt: Date.now()
+      };
+      state.longPressTimer = window.setTimeout(() => {
+        if (!state.drag || state.drag.id !== tile.dataset.tileId) return;
+        const moved = Math.abs(state.drag.startX - startX) > 10
+                   || Math.abs(state.drag.startY - startY) > 10;
+        if (!moved) {
+          tile.classList.remove('is-dragging');
+          state.drag = null;
+          showTileTooltip(tile.dataset.tileId, tile);
+        }
+      }, 500);
+    }
+
+    function onTilePointerUp(event) {
+      if (state.longPressTimer) { window.clearTimeout(state.longPressTimer); state.longPressTimer = null; }
+      const tile = event.currentTarget;
+      tile.classList.remove("is-dragging");
+      if (!state.drag || state.drag.id !== tile.dataset.tileId) return;
+
+      const dy = event.clientY - state.drag.startY;
+      const dx = event.clientX - state.drag.startX;
+      const moved = Math.abs(dy) > 18 || Math.abs(dx) > 18;
+      let targetZone = null;
+
+      if (state.drag.zone === "tray") {
+        if (dy < -18) targetZone = "upper";
+        if (dy > 18) targetZone = "lower";
+        if (!targetZone && !moved) {
+          const rect = tile.getBoundingClientRect();
+          targetZone = event.clientY < rect.top + rect.height / 2 ? "upper" : "lower";
+        }
+      } else {
+        if (dy < -18) targetZone = "upper";
+        if (dy > 18) targetZone = "lower";
+        if (!targetZone && !moved) targetZone = "tray";
+      }
+
+      state.drag = null;
+      if (targetZone) moveTile(tile.dataset.tileId, targetZone);
+    }
+
+    function onTilePointerCancel(event) {
+      if (state.longPressTimer) { window.clearTimeout(state.longPressTimer); state.longPressTimer = null; }
+      event.currentTarget.classList.remove("is-dragging");
+      state.drag = null;
+    }
+
+    function moveTile(id, targetZone) {
+      if (state.solved) return;
+      removeTileFromAllZones(id);
+      state[targetZone].push(id);
+      state.lastAttemptSignature = "";
+      renderGame();
+      highlightZone(targetZone);
+      playTone(360, 0.045);
+      vibrate(12);
+
+      if (state.tray.length === 0) {
+        window.setTimeout(checkAttempt, 360);
+      }
+    }
+
+    function removeTileFromAllZones(id) {
+      state.upper = state.upper.filter((tileId) => tileId !== id);
+      state.lower = state.lower.filter((tileId) => tileId !== id);
+      state.tray = state.tray.filter((tileId) => tileId !== id);
+    }
+
+    function highlightZone(zone) {
+      const el = zone === "upper" ? els.upperZone : zone === "lower" ? els.lowerZone : null;
+      if (!el) return;
+      el.classList.add("is-targeted");
+      window.setTimeout(() => el.classList.remove("is-targeted"), 240);
+    }
+
+    function checkAttempt() {
+      if (state.solved || state.tray.length > 0 || !state.isPlaying) return;
+      const signature = `${state.upper.join(",")}|${state.lower.join(",")}`;
+      if (signature === state.lastAttemptSignature) return;
+      state.lastAttemptSignature = signature;
+
+      const upperSum = sumZone("upper");
+      const lowerSum = sumZone("lower");
+      if (Math.abs(upperSum - lowerSum) < 0.01) {
+        handleWin();
+      } else {
+        handleWrongAttempt();
+      }
+    }
+
+    function handleWin() {
+      state.solved = true;
+      state.isPlaying = false;
+      clearTimer();
+      els.upperZone.classList.add("success");
+      els.lowerZone.classList.add("success");
+      els.board.classList.add("solved-pop");
+      playTone(620, 0.08);
+      window.setTimeout(() => playTone(840, 0.09), 90);
+      vibrate([20, 40, 20]);
+      burstConfetti();
+
+      if (state.isDailyMode) {
+        const elapsed = state.dailyStartTime
+          ? Math.round((Date.now() - state.dailyStartTime) / 1000)
+          : null;
+        window.setTimeout(() => {
+          els.board.classList.remove("solved-pop");
+          els.upperZone.classList.remove("success");
+          els.lowerZone.classList.remove("success");
+        }, 620);
+        completeDailyChallenge(true, elapsed);
+        return;
+      }
+
+      const nextLevel = state.level + 1;
+      state.bestLevel = Math.max(state.bestLevel, nextLevel);
+      state.level = nextLevel;
+      state.bonusTime = 15;
+
+      // Earn coins: 100 for level up, +100 bonus if 40%+ of time remained
+      const timeBonus = state.levelTimeLimit > 0 && state.timeLeft >= state.levelTimeLimit * 0.4;
+      window.setTimeout(() => {
+        earnCoins(100, els.board);
+        if (timeBonus) window.setTimeout(() => earnCoins(100, els.board), 700);
+      }, 250);
+
+      state.stats.totalSolved++;
+      if (state.levelStartTime) {
+        const solveSecs = Math.round((Date.now() - state.levelStartTime) / 1000);
+        if (state.stats.bestSolveTime === null || solveSecs < state.stats.bestSolveTime) {
+          state.stats.bestSolveTime = solveSecs;
+        }
+      }
+      state.stats.bestStreak = Math.max(state.stats.bestStreak, state.daily.streak);
+      saveGame();
+      els.resultTitle.textContent = "Balanced";
+      els.nextLevelStat.textContent = `Lv. ${nextLevel}`;
+
+      window.setTimeout(() => {
+        els.board.classList.remove("solved-pop");
+        if (!checkMechanicUnlock(nextLevel)) {
+          openModal("result-modal");
+        }
+      }, 620);
+    }
+
+    function handleWrongAttempt() {
+      state.lives -= 1;
+      renderHearts();
+      els.upperZone.classList.add("warning");
+      els.lowerZone.classList.add("warning");
+      els.board.classList.add("board-flash");
+      showToast("Try again");
+      playTone(140, 0.08);
+      vibrate([25, 30, 25]);
+
+      window.setTimeout(() => {
+        els.upperZone.classList.remove("warning");
+        els.lowerZone.classList.remove("warning");
+        els.board.classList.remove("board-flash");
+      }, 420);
+
+      if (state.lives <= 0) {
+        endGame("No lives left");
+      }
+    }
+
+    function endGame(title) {
+      if (state.isDailyMode) {
+        state.isPlaying = false;
+        state.solved = true;
+        clearTimer();
+        window.setTimeout(() => completeDailyChallenge(false, null), 380);
+        return;
+      }
+
+      spendGameLife();
+      state.isPlaying = false;
+      state.solved = true;
+      clearTimer();
+      els.gameoverTitle.textContent = state.gameLives <= 0 ? "No lives left" : title;
+      renderGameOverState();
+      const isTimeUp = title === "Time is up";
+      window.setTimeout(() => {
+        renderGameOverState();
+        if (isTimeUp) buildSolutionReveal();
+        openModal("gameover-modal");
+      }, 380);
+    }
+
+    function startTimer() {
+      clearTimer();
+      state.timerId = window.setInterval(() => {
+        if (!state.isPlaying || state.isPaused || state.solved || state.activeScreen !== "game") return;
+        state.timeLeft -= 1;
+        renderTimer();
+        if (state.timeLeft <= 0) {
+          state.timeLeft = 0;
+          renderTimer();
+          endGame("Time is up");
+        }
+      }, 1000);
+    }
+
+    function clearTimer() {
+      if (state.timerId) {
+        window.clearInterval(state.timerId);
+        state.timerId = null;
+      }
+    }
+
+    function sumZone(zone) {
+      return state[zone].reduce((sum, id) => sum + getTile(id).value, 0);
+    }
+
+    function getTile(id) {
+      return state.currentTiles.find((tile) => tile.id === id);
+    }
+
+    function showToast(message) {
+      els.toast.textContent = message;
+      els.toast.classList.add("is-active");
+      window.clearTimeout(showToast.timeout);
+      showToast.timeout = window.setTimeout(() => els.toast.classList.remove("is-active"), 1100);
+    }
+
+    const MECHANIC_UNLOCKS = {
+      7:  { key: 'neg',  symbol: '−n', color: '#ffb2b7', name: 'Negative Numbers', desc: 'Tiles can now be negative — they subtract from the total. Watch your sums!' },
+      13: { key: 'sq',   symbol: 'x²', color: '#ffdc2f', name: 'Squares',           desc: 'Tiles can now appear as perfect squares. Spot them and use them wisely!' },
+      33: { key: 'root', symbol: '√x', color: '#98d85f', name: 'Square Roots',      desc: 'Tiles can now show square roots. Find the hidden value inside!' },
+      89: { key: 'p2',   symbol: '⬆',  color: '#89ceff', name: 'Phase 2',           desc: 'Bigger numbers, more tiles — you\'ve mastered the basics. Now it gets real!' },
+    };
+
+    function checkMechanicUnlock(nextLevel) {
+      const unlock = MECHANIC_UNLOCKS[nextLevel];
+      if (!unlock) return false;
+      if (localStorage.getItem(`eb_unlocked_${unlock.key}`)) return false;
+      localStorage.setItem(`eb_unlocked_${unlock.key}`, '1');
+      showUnlockModal(unlock);
+      return true;
+    }
+
+    function showUnlockModal(unlock) {
+      const panel  = document.getElementById('unlock-panel');
+      const badge  = document.getElementById('unlock-badge');
+      const name   = document.getElementById('unlock-name');
+      const desc   = document.getElementById('unlock-desc');
+      const shine  = document.getElementById('unlock-shine');
+
+      panel.style.setProperty('--unlock-color', unlock.color);
+      shine.style.setProperty('--unlock-color', unlock.color);
+      badge.style.setProperty('--unlock-color', unlock.color);
+      badge.textContent = unlock.symbol;
+      name.textContent  = unlock.name;
+      desc.textContent  = unlock.desc;
+
+      // reset animations
+      badge.style.animation = 'none';
+      void badge.offsetWidth;
+      badge.style.animation = '';
+
+      // clear old sparkles
+      panel.querySelectorAll('.unlock-sparkle, .unlock-star').forEach(el => el.remove());
+
+      // burst sparkles from badge center
+      const cx = panel.offsetWidth / 2;
+      const cy = 90;
+      const sparkleColors = [unlock.color, '#fff', '#ffdc2f', '#c8f'];
+      for (let i = 0; i < 22; i++) {
+        const el = document.createElement('span');
+        const isStar = i % 4 === 0;
+        el.className = isStar ? 'unlock-star' : 'unlock-sparkle';
+        const angle = (i / 22) * 360 + Math.random() * 16;
+        const dist  = 60 + Math.random() * 110;
+        const tx = Math.round(Math.cos(angle * Math.PI / 180) * dist);
+        const ty = Math.round(Math.sin(angle * Math.PI / 180) * dist);
+        el.style.cssText = `
+          left:${cx}px; top:${cy}px;
+          --tx:${tx}px; --ty:${ty}px;
+          --dur:${0.6 + Math.random() * 0.7}s;
+          --delay:${Math.random() * 0.25}s;
+          --rot:${Math.round(Math.random() * 360)}deg;
+          --sz:${10 + Math.round(Math.random() * 10)}px;
+          width:${4 + Math.round(Math.random() * 6)}px;
+          height:${4 + Math.round(Math.random() * 6)}px;
+          background:${sparkleColors[i % sparkleColors.length]};
+          color:${sparkleColors[i % sparkleColors.length]};
+        `;
+        el.textContent = isStar ? '★' : '';
+        panel.appendChild(el);
+      }
+
+      openModal('unlock-modal');
+    }
+
+    function burstConfetti() {
+      els.confettiLayer.innerHTML = "";
+      const colors = ["#89ceff", "#b50036", "#ffb86e", "#98d85f", "#ffdc2f", "#c735e7"];
+      for (let i = 0; i < 28; i++) {
+        const piece = document.createElement("span");
+        piece.className = "confetti";
+        piece.style.left = `${randInt(8, 92)}vw`;
+        piece.style.top = `${randInt(-12, 10)}vh`;
+        piece.style.background = colors[i % colors.length];
+        piece.style.setProperty("--dx", `${randInt(-80, 80)}px`);
+        piece.style.animationDelay = `${Math.random() * 180}ms`;
+        els.confettiLayer.appendChild(piece);
+      }
+      window.setTimeout(() => els.confettiLayer.innerHTML = "", 1300);
+    }
+
+    function startRewardedAd() {
+      if (state.adTimerId) return;
+      state.adSecondsLeft = REWARDED_AD_SECONDS;
+      els.adCount.textContent = state.adSecondsLeft;
+      const subtitle = document.getElementById('ad-subtitle');
+      if (subtitle) subtitle.textContent = 'Lives refill + earn 1000 🪙 when the ad finishes.';
+      els.fullscreenAd.classList.add("is-active");
+
+      state.adTimerId = window.setInterval(() => {
+        state.adSecondsLeft -= 1;
+        els.adCount.textContent = Math.max(0, state.adSecondsLeft);
+
+        if (state.adSecondsLeft <= 0) {
+          window.clearInterval(state.adTimerId);
+          state.adTimerId = null;
+          els.fullscreenAd.classList.remove("is-active");
+          els.gameoverTitle.textContent = "Lives refilled";
+          restoreGameLives(true);
+          earnCoins(1000, null);
+          renderGameOverState();
+        }
+      }, 1000);
+    }
+
+    function playTone(frequency, duration) {
+      if (!state.settings.sound) return;
+      try {
+        const AudioContext = window.AudioContext || window.webkitAudioContext;
+        const context = new AudioContext();
+        const oscillator = context.createOscillator();
+        const gain = context.createGain();
+        oscillator.type = "sine";
+        oscillator.frequency.value = frequency;
+        gain.gain.setValueAtTime(0.04, context.currentTime);
+        gain.gain.exponentialRampToValueAtTime(0.001, context.currentTime + duration);
+        oscillator.connect(gain);
+        gain.connect(context.destination);
+        oscillator.start();
+        oscillator.stop(context.currentTime + duration);
+      } catch {
+        // Sound is optional.
+      }
+    }
+
+    function vibrate(pattern) {
+      if (state.settings.vibration && navigator.vibrate) {
+        navigator.vibrate(pattern);
+      }
+    }
+
+    function formatTime(seconds) {
+      const safe = Math.max(0, seconds);
+      const mins = Math.floor(safe / 60);
+      const secs = safe % 60;
+      return `${String(mins).padStart(2, "0")}:${String(secs).padStart(2, "0")}`;
+    }
+
+    function toSuperscript(number) {
+      const map = {
+        "-": "⁻",
+        "0": "⁰",
+        "1": "¹",
+        "2": "²",
+        "3": "³",
+        "4": "⁴",
+        "5": "⁵",
+        "6": "⁶",
+        "7": "⁷",
+        "8": "⁸",
+        "9": "⁹"
+      };
+      return String(number).split("").map((char) => map[char] || char).join("");
+    }
+
+    function formatRoot(degree, radicand) {
+      if (degree === 2) return `√${radicand}`;
+      if (degree === 3) return `∛${radicand}`;
+      if (degree === 4) return `∜${radicand}`;
+      return `${toSuperscript(degree)}√${radicand}`;
+    }
+
+    function roundValue(value) {
+      return Math.round(value * 100) / 100;
+    }
+
+    function randInt(min, max) {
+      const low = Math.ceil(Math.min(min, max));
+      const high = Math.floor(Math.max(min, max));
+      return Math.floor(Math.random() * (high - low + 1)) + low;
+    }
+
+    function shuffle(array) {
+      const copy = [...array];
+      for (let i = copy.length - 1; i > 0; i--) {
+        const j = Math.floor(Math.random() * (i + 1));
+        [copy[i], copy[j]] = [copy[j], copy[i]];
+      }
+      return copy;
+    }
+
+    // --- Daily Challenge ---
+
+    function mulberry32(seed) {
+      return function () {
+        let t = (seed += 0x6D2B79F5);
+        t = Math.imul(t ^ (t >>> 15), t | 1);
+        t ^= t + Math.imul(t ^ (t >>> 7), t | 61);
+        return ((t ^ (t >>> 14)) >>> 0) / 4294967296;
+      };
+    }
+
+    function getDailyDateStr() {
+      const now = new Date();
+      return `${now.getFullYear()}-${String(now.getMonth() + 1).padStart(2, "0")}-${String(now.getDate()).padStart(2, "0")}`;
+    }
+
+    function getDayNumber() {
+      return Math.floor((Date.now() - new Date("2025-01-01").getTime()) / 86400000) + 1;
+    }
+
+    function isDailyDone() {
+      return state.daily.date === getDailyDateStr();
+    }
+
+    function startDailyChallenge() {
+      if (isDailyDone()) {
+        showDailyResultModal();
+        return;
+      }
+
+      closeAllModals();
+      clearTimer();
+
+      const dayNum = getDayNumber();
+      const dailyLevel = ((dayNum - 1) % 30) + 5;
+      const seed = parseInt(getDailyDateStr().replace(/-/g, ""), 10);
+      const rng = mulberry32(seed);
+      const origRandom = Math.random;
+      Math.random = rng;
+      const levelData = generateLevel(dailyLevel);
+      Math.random = origRandom;
+
+      state.isDailyMode = true;
+      state.dailyStartTime = Date.now();
+      state.lives = STRIKES_PER_GAME;
+      state.currentTiles = levelData.tiles;
+      state.upper = [];
+      state.lower = [];
+      state.tray = levelData.tiles.map((tile) => tile.id);
+      state.timeLeft = levelData.settings.timeLimit;
+      state.bonusTime = 0;
+      state.solved = false;
+      state.isPlaying = true;
+      state.isPaused = false;
+      state.lastAttemptSignature = "";
+
+      showScreen("game");
+      renderGame();
+      startTimer();
+    }
+
+    function completeDailyChallenge(won, timeTaken) {
+      state.isDailyMode = false;
+      const today = getDailyDateStr();
+      const yesterday = new Date();
+      yesterday.setDate(yesterday.getDate() - 1);
+      const yStr = `${yesterday.getFullYear()}-${String(yesterday.getMonth() + 1).padStart(2, "0")}-${String(yesterday.getDate()).padStart(2, "0")}`;
+
+      if (won) {
+        state.daily.streak = state.daily.date === yStr ? state.daily.streak + 1 : 1;
+        if (timeTaken !== null) {
+          if (state.stats.bestDailyTime === null || timeTaken < state.stats.bestDailyTime) {
+            state.stats.bestDailyTime = timeTaken;
+          }
+        }
+      } else if (state.daily.date !== today) {
+        state.daily.streak = 0;
+      }
+
+      state.stats.bestStreak = Math.max(state.stats.bestStreak, state.daily.streak);
+      state.daily.date = today;
+      state.daily.won = won;
+      state.daily.timeTaken = timeTaken;
+      saveGame();
+      updateDailyButton();
+      window.setTimeout(showDailyResultModal, won ? 700 : 420);
+    }
+
+    function getDailyShareText() {
+      const dayNum = getDayNumber();
+      const { won, timeTaken, streak } = state.daily;
+      let text = `Equal Blocks Daily #${dayNum}\n`;
+      text += won ? `✅ Balanced in ${formatTime(timeTaken)}\n` : "❌ Not solved today\n";
+      if (streak > 1) text += `🔥 ${streak}-day streak\n`;
+      text += "\nequal-blocks.app";
+      return text;
+    }
+
+    function showDailyResultModal() {
+      const dayNum = getDayNumber();
+      const { won, timeTaken, streak } = state.daily;
+
+      closeAllModals();
+      showScreen("menu");
+
+      document.getElementById("daily-result-title").textContent = `Daily #${dayNum}`;
+      document.getElementById("daily-result-text").textContent = getDailyShareText();
+
+      const statsEl = document.getElementById("daily-result-stats");
+      statsEl.innerHTML = "";
+      const statData = [
+        { label: "RESULT", value: won ? "Solved ✅" : "Failed ❌" },
+        { label: "STREAK", value: streak > 0 ? `${streak} 🔥` : "—" }
+      ];
+      if (won && timeTaken != null) {
+        statData.push({ label: "TIME", value: formatTime(timeTaken) });
+      }
+      statData.forEach(({ label, value }) => {
+        const stat = document.createElement("div");
+        stat.className = "stat";
+        stat.innerHTML = `<span class="stat-label">${label}</span><span class="stat-value" style="font-size:18px">${value}</span>`;
+        statsEl.appendChild(stat);
+      });
+
+      openModal("daily-result-modal");
+    }
+
+    function updateDailyButton() {
+      const btn = document.getElementById("daily-button");
+      if (!btn) return;
+      const done = isDailyDone();
+      btn.classList.toggle("is-done", done);
+      const labelEl = btn.querySelector(".daily-btn-label");
+      if (labelEl) labelEl.textContent = done ? "Daily Done ✓" : "Daily Challenge";
+    }
+
+    // --- End Daily Challenge ---
+
+    function renderStatsModal() {
+      const fmt = (s) => s !== null ? `${s}s` : '—';
+      document.getElementById('sb-best-level').textContent  = `Lv. ${state.bestLevel}`;
+      document.getElementById('sb-total-solved').textContent = state.stats.totalSolved || '0';
+      document.getElementById('sb-best-time').textContent   = fmt(state.stats.bestSolveTime);
+      document.getElementById('sb-best-streak').textContent = state.stats.bestStreak
+        ? `${state.stats.bestStreak} 🔥` : '—';
+      document.getElementById('sb-best-daily').textContent  = fmt(state.stats.bestDailyTime);
+    }
+
+    // ── Coin System ────────────────────────────────────────────
+
+    function playChaChingSound() {
+      if (!state.settings.sound) return;
+      try {
+        const AudioContext = window.AudioContext || window.webkitAudioContext;
+        const ctx = new AudioContext();
+        [[523, 0], [659, 0.1], [784, 0.2]].forEach(([freq, delay]) => {
+          const osc = ctx.createOscillator();
+          const g = ctx.createGain();
+          osc.type = 'triangle';
+          osc.frequency.value = freq;
+          const t = ctx.currentTime + delay;
+          g.gain.setValueAtTime(0.001, t);
+          g.gain.linearRampToValueAtTime(0.07, t + 0.025);
+          g.gain.exponentialRampToValueAtTime(0.001, t + 0.22);
+          osc.connect(g);
+          g.connect(ctx.destination);
+          osc.start(t);
+          osc.stop(t + 0.22);
+        });
+      } catch {}
+    }
+
+    function floatCoinLabel(amount, sourceEl) {
+      const label = document.createElement('div');
+      label.className = 'coin-float';
+      label.textContent = (amount > 0 ? '+' : '') + amount + ' 🪙';
+      let x = window.innerWidth / 2;
+      let y = window.innerHeight * 0.4;
+      if (sourceEl) {
+        const r = sourceEl.getBoundingClientRect();
+        x = r.left + r.width / 2;
+        y = r.top + r.height * 0.25;
+      }
+      label.style.left = x + 'px';
+      label.style.top  = y + 'px';
+      document.body.appendChild(label);
+      window.setTimeout(() => label.remove(), 1300);
+    }
+
+    function earnCoins(amount, sourceEl) {
+      state.coins += amount;
+      saveGame();
+      updateCoinDisplay();
+      floatCoinLabel(amount, sourceEl);
+      playChaChingSound();
+    }
+
+    function spendCoins(amount) {
+      if (state.coins < amount) return false;
+      state.coins -= amount;
+      saveGame();
+      updateCoinDisplay();
+      return true;
+    }
+
+    function updateCoinDisplay() {
+      const menuEl = document.getElementById('menu-coins');
+      if (menuEl) menuEl.textContent = state.coins.toLocaleString();
+      const gameEl = document.getElementById('game-coins');
+      if (gameEl) gameEl.textContent = state.coins.toLocaleString();
+      const counter = document.getElementById('coin-counter');
+      if (counter) {
+        counter.classList.remove('bump');
+        void counter.offsetWidth;
+        counter.classList.add('bump');
+      }
+      renderHelperBar();
+    }
+
+    function renderHelperBar() {
+      const sumBtn  = document.getElementById('helper-sum-btn');
+      const skipBtn = document.getElementById('helper-skip-btn');
+      if (!sumBtn || !skipBtn) return;
+      sumBtn.classList.toggle('is-active',    state.sumDisplayActive);
+      sumBtn.classList.toggle('cant-afford',  !state.sumDisplayActive && state.coins < 300);
+      skipBtn.classList.toggle('cant-afford', state.coins < 1500);
+    }
+
+    function activateSumDisplay() {
+      if (state.sumDisplayActive) {
+        state.sumDisplayActive = false;
+        document.querySelectorAll('.zone-sum-badge').forEach(el => el.remove());
+        renderHelperBar();
+        return;
+      }
+      if (!spendCoins(300)) { showToast('Need 300 🪙'); return; }
+      state.sumDisplayActive = true;
+      updateZoneSumBadges();
+      renderHelperBar();
+    }
+
+    function updateZoneSumBadges() {
+      if (!state.sumDisplayActive) return;
+      ['upper', 'lower'].forEach(zone => {
+        const zoneEl = zone === 'upper' ? els.upperZone : els.lowerZone;
+        let badge = zoneEl.querySelector('.zone-sum-badge');
+        if (!badge) {
+          badge = document.createElement('div');
+          badge.className = 'zone-sum-badge';
+          zoneEl.appendChild(badge);
+        }
+        const s = sumZone(zone);
+        badge.textContent = String(Math.round(s * 100) / 100);
+      });
+    }
+
+    function doSkipLevel() {
+      if (!spendCoins(1500)) { showToast('Need 1500 🪙'); return; }
+      showToast('Level skipped!');
+      state.sumDisplayActive = false;
+      document.querySelectorAll('.zone-sum-badge').forEach(el => el.remove());
+      const next = state.level + 1;
+      state.level = next;
+      state.bestLevel = Math.max(state.bestLevel, next);
+      state.bonusTime = 0;
+      saveGame();
+      startLevel(next);
+    }
+
+    function showTileTooltip(tileId, el) {
+      if (!spendCoins(200)) { showToast('Need 200 🪙'); return; }
+      const tile = getTile(tileId);
+      if (!tile) return;
+      document.querySelectorAll('.tile-tooltip').forEach(t => t.remove());
+      const tip = document.createElement('div');
+      tip.className = 'tile-tooltip';
+      tip.textContent = `= ${tile.value}`;
+      const r = el.getBoundingClientRect();
+      tip.style.left = (r.left + r.width / 2) + 'px';
+      tip.style.top  = (r.top - 8) + 'px';
+      document.body.appendChild(tip);
+      window.setTimeout(() => tip.remove(), 2000);
+      playChaChingSound();
+      updateCoinDisplay();
+    }
+
+    function findSolution(tiles) {
+      if (!tiles || tiles.length < 2) return null;
+      const half = tiles.length / 2;
+      if (!Number.isInteger(half)) return null;
+      const total = tiles.reduce((s, t) => s + t.value, 0);
+      const target = total / 2;
+      const ids = tiles.map(t => t.id);
+
+      function search(idx, chosen, chosenSum) {
+        if (chosen.length === half) {
+          return Math.abs(chosenSum - target) < 0.01
+            ? { upper: chosen, lower: ids.filter(id => !chosen.includes(id)) }
+            : null;
+        }
+        if (idx >= ids.length) return null;
+        if (ids.length - idx < half - chosen.length) return null;
+        const r = search(idx + 1, [...chosen, ids[idx]], chosenSum + tiles[idx].value);
+        if (r) return r;
+        return search(idx + 1, chosen, chosenSum);
+      }
+      return search(0, [], 0);
+    }
+
+    function buildSolutionReveal() {
+      const revealEl = document.getElementById('solution-reveal');
+      const rowsEl   = document.getElementById('solution-rows');
+      if (!revealEl || !rowsEl || !state.currentTiles.length) return;
+      rowsEl.innerHTML = '';
+      const solution = findSolution(state.currentTiles);
+      if (!solution) return;
+      ['Top:', 'Bot:'].forEach((lbl, i) => {
+        const tileIds = i === 0 ? solution.upper : solution.lower;
+        const row = document.createElement('div');
+        row.className = 'solution-row';
+        const label = document.createElement('span');
+        label.className = 'solution-row-label';
+        label.textContent = lbl;
+        row.appendChild(label);
+        tileIds.forEach(id => {
+          const t = getTile(id);
+          if (!t) return;
+          const chip = document.createElement('span');
+          chip.className = 'solution-chip';
+          chip.textContent = t.label;
+          row.appendChild(chip);
+        });
+        rowsEl.appendChild(row);
+      });
+      revealEl.style.display = 'block';
+    }
+
+    function startCoinAd() {
+      if (state.adTimerId) return;
+      state.adSecondsLeft = REWARDED_AD_SECONDS;
+      els.adCount.textContent = state.adSecondsLeft;
+      const subtitle = document.getElementById('ad-subtitle');
+      if (subtitle) subtitle.textContent = 'You earn 1000 🪙 when the ad finishes.';
+      els.fullscreenAd.classList.add('is-active');
+
+      state.adTimerId = window.setInterval(() => {
+        state.adSecondsLeft -= 1;
+        els.adCount.textContent = Math.max(0, state.adSecondsLeft);
+        if (state.adSecondsLeft <= 0) {
+          window.clearInterval(state.adTimerId);
+          state.adTimerId = null;
+          els.fullscreenAd.classList.remove('is-active');
+          earnCoins(1000, null);
+          showToast('+1000 🪙 earned!');
+        }
+      }, 1000);
+    }
+
+    // ── End Coin System ─────────────────────────────────────────
+
+    function wireEvents() {
+      $("#play-button").addEventListener("click", () => {
+        if (!localStorage.getItem("eb_tutorial_seen")) {
+          openModal("tutorial-modal");
+        } else {
+          startLevel(state.level);
+        }
+      });
+      $("#tutorial-got-it").addEventListener("click", () => {
+        localStorage.setItem("eb_tutorial_seen", "1");
+        closeModal("tutorial-modal");
+        startLevel(state.level);
+      });
+      $("#unlock-lets-go").addEventListener("click", () => {
+        closeModal("unlock-modal");
+        openModal("result-modal");
+      });
+      $("#new-game-button").addEventListener("click", () => {
+        state.level = 1;
+        state.bonusTime = 0;
+        saveGame();
+        startLevel(1);
+      });
+      $("#daily-button").addEventListener("click", startDailyChallenge);
+      $("#daily-share-button").addEventListener("click", () => {
+        const text = getDailyShareText();
+        if (navigator.clipboard && navigator.clipboard.writeText) {
+          navigator.clipboard.writeText(text).then(() => showToast("Copied!")).catch(() => showToast("Copy failed"));
+        } else {
+          showToast("Copied!");
+        }
+      });
+      $("#menu-settings-button").addEventListener("click", () => openModal("settings-modal"));
+      $("#how-button").addEventListener("click", () => openModal("rules-modal"));
+      document.getElementById("earn-coins-button").addEventListener("click", startCoinAd);
+      document.getElementById("helper-sum-btn").addEventListener("click", activateSumDisplay);
+      document.getElementById("helper-skip-btn").addEventListener("click", doSkipLevel);
+      $("#stats-button").addEventListener("click", () => { renderStatsModal(); openModal("stats-modal"); });
+      $("#pause-button").addEventListener("click", () => {
+        if (!state.solved) openModal("pause-modal");
+      });
+      $("#resume-button").addEventListener("click", () => closeModal("pause-modal"));
+      $("#restart-button").addEventListener("click", () => {
+        if (state.isDailyMode) {
+          startDailyChallenge();
+        } else {
+          startLevel(state.level);
+        }
+      });
+      $("#pause-settings-button").addEventListener("click", () => openModal("settings-modal"));
+      $("#quit-button").addEventListener("click", () => {
+        clearTimer();
+        closeAllModals();
+        state.isPlaying = false;
+        state.isDailyMode = false;
+        showScreen("menu");
+      });
+      $("#next-level-button").addEventListener("click", () => startLevel(state.level));
+      $("#try-again-button").addEventListener("click", () => startLevel(state.level));
+      $("#gameover-menu-button").addEventListener("click", () => {
+        closeAllModals();
+        showScreen("menu");
+      });
+      $("#reset-progress-button").addEventListener("click", () => {
+        state.level = 1;
+        state.bestLevel = 1;
+        state.bonusTime = 0;
+        state.coins = 0;
+        state.gameLives = MAX_GAME_LIVES;
+        state.livesReadyAt = null;
+        clearRechargeTimer();
+        saveGame();
+        renderMenu();
+        renderLifeBank();
+        renderGameOverState();
+        showToast("Progress reset");
+      });
+      els.watchAdButton.addEventListener("click", startRewardedAd);
+
+      els.soundToggle.addEventListener("click", () => {
+        state.settings.sound = !state.settings.sound;
+        saveGame();
+        renderToggles();
+      });
+      els.vibrationToggle.addEventListener("click", () => {
+        state.settings.vibration = !state.settings.vibration;
+        saveGame();
+        renderToggles();
+      });
+
+      $$("[data-close-modal]").forEach((button) => {
+        button.addEventListener("click", () => closeModal(button.dataset.closeModal));
+      });
+
+      document.addEventListener("keydown", (event) => {
+        if (event.key === "Escape") {
+          if (els.settingsModal.classList.contains("is-active")) closeModal("settings-modal");
+          else if (els.rulesModal.classList.contains("is-active")) closeModal("rules-modal");
+          else if (els.pauseModal.classList.contains("is-active")) closeModal("pause-modal");
+          else if (state.activeScreen === "game" && !state.solved) openModal("pause-modal");
+        }
+      });
+
+      window.addEventListener("resize", () => {
+        if (state.activeScreen === "game") renderTray();
+      });
+    }
+
+    normalizeIcons();
+    loadSave();
+    wireEvents();
+    renderMenu();
+    renderToggles();
+    updateDailyButton();
+  </script>
+</body>
+</html>

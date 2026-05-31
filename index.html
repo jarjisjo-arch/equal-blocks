@@ -1356,6 +1356,47 @@
       z-index: 2;
     }
 
+    .menu-tab-row {
+      display: grid;
+      grid-template-columns: repeat(4, 1fr);
+      gap: 8px;
+    }
+
+    .tab-btn {
+      background: var(--surface-container-high);
+      border: 1px solid rgba(62,72,80,0.28);
+      border-radius: 14px;
+      padding: 12px 6px 10px;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      gap: 5px;
+      font-family: inherit;
+      font-size: 11px;
+      font-weight: 700;
+      color: var(--on-surface-variant);
+      cursor: pointer;
+      transition: background 150ms ease, transform 120ms ease, color 150ms ease;
+      letter-spacing: 0.02em;
+      box-shadow: 0 2px 0 rgba(0,0,0,0.25), 0 4px 8px rgba(0,0,0,0.12);
+      border: 0;
+    }
+
+    .tab-btn:hover  { background: var(--surface-container-highest); color: var(--on-surface); }
+    .tab-btn:active { transform: translateY(1px); }
+
+    .tab-btn-icon { font-size: 22px; line-height: 1; }
+
+    .tab-btn.daily-tab {
+      background: linear-gradient(135deg, var(--primary-container), var(--tertiary-container));
+      color: var(--on-surface);
+    }
+
+    .tab-btn.daily-tab.is-done {
+      background: var(--surface-container-high);
+      color: var(--on-surface-variant);
+    }
+
     .game-coin-badge {
       display: inline-flex;
       align-items: center;
@@ -1517,25 +1558,24 @@
             <span class="material-symbols-outlined" aria-hidden="true">play_arrow</span>
             Play
           </button>
-          <button class="action-button daily" id="daily-button">
-            <span class="material-symbols-outlined" aria-hidden="true">calendar_today</span>
-            <span class="daily-btn-label">Daily Challenge</span>
-          </button>
-          <button class="action-button secondary" id="new-game-button">
-            <span class="material-symbols-outlined" aria-hidden="true">refresh</span>
-            New Game
-          </button>
-          <button class="action-button secondary" id="stats-button">
-            <span class="material-symbols-outlined" aria-hidden="true">emoji_events</span>
-            My Bests
-          </button>
-          <button class="action-button secondary" id="how-button">
-            <span class="material-symbols-outlined" aria-hidden="true">psychology</span>
-            Rules
-          </button>
-          <button class="action-button secondary" id="earn-coins-button">
-            +1000 🪙 — Watch Ad
-          </button>
+          <div class="menu-tab-row">
+            <button class="tab-btn daily-tab" id="daily-button">
+              <span class="tab-btn-icon">◈</span>
+              <span class="daily-btn-label">Daily</span>
+            </button>
+            <button class="tab-btn" id="stats-button">
+              <span class="tab-btn-icon">🏆</span>
+              My Bests
+            </button>
+            <button class="tab-btn" id="how-button">
+              <span class="tab-btn-icon">?</span>
+              Rules
+            </button>
+            <button class="tab-btn" id="earn-coins-button">
+              <span class="tab-btn-icon">🪙</span>
+              +1000 Ad
+            </button>
+          </div>
         </div>
       </main>
 
@@ -1634,6 +1674,10 @@
           </span>
           <button class="toggle" id="vibration-toggle" type="button" aria-label="Toggle vibration" aria-pressed="true"></button>
         </div>
+        <button class="action-button secondary" id="new-game-button">
+          <span class="material-symbols-outlined" aria-hidden="true">refresh</span>
+          New Game
+        </button>
         <button class="action-button danger" id="reset-progress-button">
           <span class="material-symbols-outlined" aria-hidden="true">delete</span>
           Reset Progress
@@ -3160,7 +3204,7 @@
       const done = isDailyDone();
       btn.classList.toggle("is-done", done);
       const labelEl = btn.querySelector(".daily-btn-label");
-      if (labelEl) labelEl.textContent = done ? "Daily Done ✓" : "Daily Challenge";
+      if (labelEl) labelEl.textContent = done ? "Done ✓" : "Daily";
     }
 
     // --- End Daily Challenge ---

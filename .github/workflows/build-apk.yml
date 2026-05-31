@@ -36,21 +36,19 @@ jobs:
       - name: Rename APK
         run: cp app/build/outputs/apk/debug/app-debug.apk Calcly-debug.apk
 
-      - name: Upload APK artifact
-        uses: actions/upload-artifact@v4
-        with:
-          name: Calcly-debug
-          path: Calcly-debug.apk
-          retention-days: 7
+      - name: Delete old release and tag if exists
+        env:
+          GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+        run: |
+          gh release delete debug-latest --yes --cleanup-tag 2>/dev/null || true
 
       - name: Publish APK as GitHub Release
-        uses: softprops/action-gh-release@v2
-        with:
-          tag_name: debug-latest
-          name: Calcly Debug Build (latest)
-          body: |
-            Latest Calcly debug APK — download and install directly on your Android phone.
+        env:
+          GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+        run: |
+          gh release create debug-latest Calcly-debug.apk \
+            --title "Calcly Debug Build (latest)" \
+            --notes "Latest Calcly debug APK — download and install directly on your Android phone.
 
-            > Enable "Install from unknown sources" in your phone settings if prompted.
-          prerelease: true
-          files: Calcly-debug.apk
+          > Enable 'Install from unknown sources' in your phone settings if prompted." \
+            --prerelease

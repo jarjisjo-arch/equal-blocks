@@ -2310,7 +2310,8 @@
       const highTiles     = phaseNum === 1 ? 6 : 8;
       const highTileCount = Math.round(levelsInWave * 0.4);
       let blockCount      = (isEvenWave && posInWave >= levelsInWave - highTileCount) ? highTiles : baseTiles;
-      if (level <= 10) blockCount = 6; // early game engagement boost
+      if (level === 1) blockCount = 4; // gentle intro
+      else if (level <= 10) blockCount = 6; // early game engagement boost
 
       // Number range: sawtooth within each wave, slowly rising baseline across waves
       // Phase 1 scale = 1×; Phase 2 = 2.2×; Phase 3 = 3.2×; Phase 4 = 4.5×; Endless = 6×

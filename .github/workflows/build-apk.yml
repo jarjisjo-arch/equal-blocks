@@ -21,9 +21,6 @@ jobs:
           java-version: '17'
           distribution: 'temurin'
 
-      - name: Set up Android SDK
-        uses: android-actions/setup-android@v3
-
       - name: Write local.properties
         run: echo "sdk.dir=$ANDROID_SDK_ROOT" > local.properties
 
@@ -33,22 +30,15 @@ jobs:
       - name: Build debug APK
         run: ./gradlew assembleDebug --no-daemon
 
-      - name: Rename APK
-        run: cp app/build/outputs/apk/debug/app-debug.apk Calcly-debug.apk
-
-      - name: Delete old release and tag if exists
-        env:
-          GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
-        run: |
-          gh release delete debug-latest --yes --cleanup-tag 2>/dev/null || true
-
       - name: Publish APK as GitHub Release
         env:
           GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
         run: |
-          gh release create debug-latest Calcly-debug.apk \
-            --title "Calcly Debug Build (latest)" \
-            --notes "Latest Calcly debug APK — download and install directly on your Android phone.
-
-          > Enable 'Install from unknown sources' in your phone settings if prompted." \
-            --prerelease
+          gh release delete debug-latest --yes --cleanup-tag 2>/dev/null || true
+          sleep 3
+          gh release create debug-latest \
+            app/build/outputs/apk/debug/app-debug.apk \
+            --title "Calcly Debug Build" \
+            --notes "Latest Calcly debug APK. Enable Install from unknown sources in settings if prompted." \
+            --prerelease \
+            --target ${{ github.sha }}

@@ -3,7 +3,7 @@
 <head>
   <meta charset="utf-8" />
   <meta content="width=device-width, initial-scale=1.0" name="viewport" />
-  <title>Equal Blocks</title>
+  <title>Calcly</title>
   <link href="https://fonts.googleapis.com/css2?family=Quicksand:wght@500;700&display=swap" rel="stylesheet" />
   <style>
     :root {
@@ -1376,7 +1376,7 @@
       <header class="top-app-bar">
         <div class="brand">
           <span class="material-symbols-outlined" aria-hidden="true">grid_view</span>
-          <h1 class="brand-title">Equal Blocks</h1>
+          <h1 class="brand-title">Calcly</h1>
         </div>
         <button class="icon-button" id="menu-settings-button" aria-label="Settings">
           <span class="material-symbols-outlined" aria-hidden="true">settings</span>
@@ -1391,7 +1391,7 @@
             <div class="logo-tile tile-orange tile-shadow" style="color: var(--on-tertiary-container); background: var(--tertiary-container);">40</div>
             <div class="logo-tile tile-sky tile-shadow" style="color: var(--on-primary); background: var(--primary);">60</div>
           </div>
-          <h2 class="menu-title">Equal Blocks</h2>
+          <h2 class="menu-title">Calcly</h2>
           <p class="menu-subtitle">Make both sides equal.</p>
         </div>
 
@@ -1455,7 +1455,7 @@
       <header class="top-app-bar">
         <div class="brand">
           <span class="material-symbols-outlined" aria-hidden="true">grid_view</span>
-          <h1 class="brand-title">Equal Blocks</h1>
+          <h1 class="brand-title">Calcly</h1>
         </div>
         <div class="level-pill">
           <span id="level-label">Lv. 1</span>
@@ -1787,7 +1787,7 @@
   </div>
 
   <script>
-    const STORAGE_KEY = "equalBlocksSave";
+    const STORAGE_KEY = "calclySave";
     const STRIKES_PER_GAME = 3;
     const MAX_GAME_LIVES = 5;
     const LIFE_RECHARGE_SECONDS = 60;
@@ -2758,8 +2758,8 @@
     function checkMechanicUnlock(nextLevel) {
       const unlock = MECHANIC_UNLOCKS[nextLevel];
       if (!unlock) return false;
-      if (localStorage.getItem(`eb_unlocked_${unlock.key}`)) return false;
-      localStorage.setItem(`eb_unlocked_${unlock.key}`, '1');
+      if (localStorage.getItem(`calcly_unlocked_${unlock.key}`)) return false;
+      localStorage.setItem(`calcly_unlocked_${unlock.key}`, '1');
       showUnlockModal(unlock);
       return true;
     }
@@ -3024,10 +3024,10 @@
     function getDailyShareText() {
       const dayNum = getDayNumber();
       const { won, timeTaken, streak } = state.daily;
-      let text = `Equal Blocks Daily #${dayNum}\n`;
+      let text = `Calcly Daily #${dayNum}\n`;
       text += won ? `✅ Balanced in ${formatTime(timeTaken)}\n` : "❌ Not solved today\n";
       if (streak > 1) text += `🔥 ${streak}-day streak\n`;
-      text += "\nequal-blocks.app";
+      text += "\ncalcly.app";
       return text;
     }
 
@@ -3359,14 +3359,14 @@
 
     function wireEvents() {
       $("#play-button").addEventListener("click", () => {
-        if (!localStorage.getItem("eb_tutorial_seen")) {
+        if (!localStorage.getItem("calcly_tutorial_seen")) {
           openModal("tutorial-modal");
         } else {
           startLevel(state.level);
         }
       });
       $("#tutorial-got-it").addEventListener("click", () => {
-        localStorage.setItem("eb_tutorial_seen", "1");
+        localStorage.setItem("calcly_tutorial_seen", "1");
         closeModal("tutorial-modal");
         startLevel(state.level);
       });
